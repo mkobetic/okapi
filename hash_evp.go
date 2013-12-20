@@ -59,17 +59,17 @@ func (h *Hash) BlockSize() int {
 }
 
 func (h *Hash) Reset() {
-	C.EVP_DigestInit_ex(h.evp_ctx, nil, nil)
+	check(C.EVP_DigestInit_ex(h.evp_ctx, nil, nil))
 }
 
 func (h *Hash) Sum(b []byte) []byte {
 	C.EVP_MD_CTX_copy_ex(h.evp_ctx2, h.evp_ctx)
-	C.EVP_DigestFinal_ex(h.evp_ctx2, (*C.uchar)(&h.Digest[0]), nil)
+	check(C.EVP_DigestFinal_ex(h.evp_ctx2, (*C.uchar)(&h.Digest[0]), nil))
 	return append(b, h.Digest...)
 }
 
 func (h *Hash) Write(data []byte) (int, error) {
-	C.EVP_DigestUpdate(h.evp_ctx, unsafe.Pointer(&data[0]), C.size_t(len(data)))
+	check(C.EVP_DigestUpdate(h.evp_ctx, unsafe.Pointer(&data[0]), C.size_t(len(data))))
 	return len(data), nil
 }
 
