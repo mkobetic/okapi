@@ -6,16 +6,16 @@ import (
 )
 
 func TestEvpHash(t *testing.T) {
-	hash := NewHash(MD5)
-	defer hash.Close()
-	if hash.Size() != 16 {
+	md5 := NewHash(MD5)
+	defer md5.Close()
+	if md5.Size() != 16 {
 		t.Fail()
 	}
-	if hash.BlockSize() != 64 {
+	if md5.BlockSize() != 64 {
 		t.Fail()
 	}
-	hash.Write([]byte("test"))
-	digest := hash.Sum([]byte{})
+	md5.Write([]byte("test"))
+	digest := md5.Sum(nil)
 	if hex.EncodeToString(digest) != "098f6bcd4621d373cade4e832627b4f6" {
 		t.Fail()
 	}
