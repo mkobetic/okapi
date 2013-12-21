@@ -11,14 +11,14 @@ import (
 )
 
 func init() {
-	okapi.MD4.Use(func() okapi.Hash { return NewHash(C.EVP_md4()) })
-	okapi.MD5.Use(func() okapi.Hash { return NewHash(C.EVP_md5()) })
-	okapi.SHA1.Use(func() okapi.Hash { return NewHash(C.EVP_sha1()) })
-	okapi.SHA224.Use(func() okapi.Hash { return NewHash(C.EVP_sha224()) })
-	okapi.SHA256.Use(func() okapi.Hash { return NewHash(C.EVP_sha256()) })
-	okapi.SHA384.Use(func() okapi.Hash { return NewHash(C.EVP_sha384()) })
-	okapi.SHA512.Use(func() okapi.Hash { return NewHash(C.EVP_sha512()) })
-	okapi.RIPEMD160.Use(func() okapi.Hash { return NewHash(C.EVP_ripemd160()) })
+	okapi.MD4.Use(MD4)
+	okapi.MD5.Use(MD5)
+	okapi.SHA1.Use(SHA1)
+	okapi.SHA224.Use(SHA224)
+	okapi.SHA256.Use(SHA256)
+	okapi.SHA384.Use(SHA384)
+	okapi.SHA512.Use(SHA512)
+	okapi.RIPEMD160.Use(RIPEMD160)
 }
 
 type Hash struct {
@@ -27,12 +27,14 @@ type Hash struct {
 	md     *C.EVP_MD // libcrypto constant
 }
 
-var (
-	MD5    = C.EVP_md5()
-	SHA1   = C.EVP_sha1()
-	SHA256 = C.EVP_sha256()
-	SHA512 = C.EVP_sha512()
-)
+func MD4() okapi.Hash       { return NewHash(C.EVP_md4()) }
+func MD5() okapi.Hash       { return NewHash(C.EVP_md5()) }
+func SHA1() okapi.Hash      { return NewHash(C.EVP_sha1()) }
+func SHA224() okapi.Hash    { return NewHash(C.EVP_sha224()) }
+func SHA256() okapi.Hash    { return NewHash(C.EVP_sha256()) }
+func SHA384() okapi.Hash    { return NewHash(C.EVP_sha384()) }
+func SHA512() okapi.Hash    { return NewHash(C.EVP_sha512()) }
+func RIPEMD160() okapi.Hash { return NewHash(C.EVP_ripemd160()) }
 
 func NewHash(algorithm *C.EVP_MD) okapi.Hash {
 	h := &Hash{md: algorithm}

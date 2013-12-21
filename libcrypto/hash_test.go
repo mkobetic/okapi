@@ -7,7 +7,7 @@ import (
 )
 
 func TestEvpHash(t *testing.T) {
-	md5 := NewHash(MD5)
+	md5 := MD5()
 	defer md5.Close()
 	if md5.Size() != 16 {
 		t.Fail()
