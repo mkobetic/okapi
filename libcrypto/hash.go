@@ -1,3 +1,5 @@
+// +build !windows
+
 // Package libcrypto implements okapi interfaces using OpenSSL's libcrypto library.
 package libcrypto
 

@@ -1,6 +1,6 @@
-// +build !windows
+// +build windows
 
-package libcrypto
+package mscng
 
 import (
 	"encoding/hex"
