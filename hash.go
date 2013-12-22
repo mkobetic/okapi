@@ -1,11 +1,12 @@
+/*
+Okapi is a collection of interfaces providing universal API to third-party cryptographic libraries. The intent is to be able transparently mix and match implementations from various sources. Subpackages implement these interfaces by calling external libraries (e.g. OpenSSL's libcrypto, or Microsoft's CNG)
+*/
 package okapi
 
-import (
-	"fmt"
-)
-
-// Hash is a cryptographic hash algorithm that computes a fixed sized digest from arbitrary amount of byte input. Input is written into Hashes the same way as into Writers.
-// Unlike hash.Hash, computing the digest finalizes the internal state of the Hash and no more input can be written into it (unless it is Reset first). If an intermediate Digest is required, or the hash computation needs to diverge and continue along separate input lines, clone the Hash after processing the common initial part of the input.
+/*
+Hash is a cryptographic hash algorithm that computes a fixed sized digest from arbitrary amount of byte input. Input is written into Hashes the same way as into Writers.
+Unlike hash.Hash, computing the digest finalizes the internal state of the Hash and no more input can be written into it (unless it is Reset first). If an intermediate Digest is required, or the hash computation needs to diverge and continue along separate input lines, clone the Hash after processing the common initial part of the input.
+*/
 type Hash interface {
 	// Write is used to submit input to the Hash compution. It conforms to standard Writer interface
 	Write([]byte) (int, error)
@@ -23,45 +24,9 @@ type Hash interface {
 	Close()
 }
 
-// HashAlgorithm identifies particular cryptographic hash algorithm. It provides implementation agnostic way of identifying hash algorithms.
-type HashAlgorithm uint
-
-// Known hash algorithms, matches the codes of crypto/Hash
+// Factory functions for known hash algorithms, provided by implementation packages
 var (
-	SHA224, SHA256, SHA384, SHA512 func() Hash
+	MD4, MD5, SHA1,
+	SHA224, SHA256, SHA384, SHA512,
+	RIPEMD160 func() Hash
 )
-
-const (
-	MD4 HashAlgorithm = 1 + iota
-	MD5
-	SHA1
-	//	SHA224
-	//	SHA256
-	//	SHA384
-	//	SHA512
-	_
-	RIPEMD160
-	MAX_HASH // always keep this last
-)
-
-// Internal registry of default hash algorithm implementations. Hash implementation packages will automatically register their implementations here. This registry can be further tuned with the Use() function.
-var hashes = make([]func() Hash, MAX_HASH)
-
-// Creates and instance of Hash from a HashAlgorithm value using the default implementation as is reflected in the hashes registry.
-func (h HashAlgorithm) New() Hash {
-	if h < MAX_HASH {
-		if f := hashes[h]; f != nil {
-			return f()
-		}
-	}
-	panic(fmt.Sprintf("Unavailable hash algorithm %d", h))
-}
-
-// Registers a Hash creation function for given hash algorithm in the default implementation registry.
-func (h HashAlgorithm) Use(f func() Hash) {
-	if h < MAX_HASH {
-		hashes[h] = f
-	} else {
-		panic(fmt.Sprintf("Unknown hash algorithm %d", h))
-	}
-}

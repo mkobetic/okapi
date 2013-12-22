@@ -2,7 +2,6 @@ package libcrypto
 
 import (
 	"encoding/hex"
-	"github.com/mkobetic/okapi"
 	"testing"
 )
 
@@ -27,7 +26,7 @@ func TestEvpHash(t *testing.T) {
 }
 
 func TestHashCloning(t *testing.T) {
-	sha := okapi.SHA256.New()
+	sha := SHA256()
 	defer sha.Close()
 	sha.Write([]byte("test"))
 	sha2 := sha.Clone()

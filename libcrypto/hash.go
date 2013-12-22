@@ -1,3 +1,4 @@
+// Package libcrypto implements okapi interfaces using OpenSSL's libcrypto library.
 package libcrypto
 
 // #cgo LDFLAGS:  -L/usr/local/opt/openssl/lib -lcrypto
@@ -11,14 +12,14 @@ import (
 )
 
 func init() {
-	okapi.MD4.Use(MD4)
-	okapi.MD5.Use(MD5)
-	okapi.SHA1.Use(SHA1)
-	okapi.SHA224.Use(SHA224)
-	okapi.SHA256.Use(SHA256)
-	okapi.SHA384.Use(SHA384)
-	okapi.SHA512.Use(SHA512)
-	okapi.RIPEMD160.Use(RIPEMD160)
+	okapi.MD4 = MD4
+	okapi.MD5 = MD5
+	okapi.SHA1 = SHA1
+	okapi.SHA224 = SHA224
+	okapi.SHA256 = SHA256
+	okapi.SHA384 = SHA384
+	okapi.SHA512 = SHA512
+	okapi.RIPEMD160 = RIPEMD160
 }
 
 type Hash struct {
