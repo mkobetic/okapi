@@ -68,6 +68,7 @@ func NewCipher(algorithm *C.EVP_CIPHER, key, iv []byte, encrypt bool) okapi.Ciph
 	c := &Cipher{cipher: algorithm}
 	c.ctx = new(C.EVP_CIPHER_CTX)
 	C.EVP_CIPHER_CTX_init(c.ctx)
+
 	var ivp *C.uchar
 	if iv != nil {
 		ivp = (*C.uchar)(&iv[0])
@@ -76,16 +77,19 @@ func NewCipher(algorithm *C.EVP_CIPHER, key, iv []byte, encrypt bool) okapi.Ciph
 	if encrypt {
 		enc = 1
 	}
-	check(C.EVP_CipherInit_ex(c.ctx, algorithm, nil, (*C.uchar)(&key[0]), ivp, enc))
+	check(C.EVP_CipherInit_ex(c.ctx, algorithm, nil, nil, nil, enc))
+	C.EVP_CIPHER_CTX_set_key_length(c.ctx, len(key))
+	C.EVP_CIPHER_CTX_set_padding(c.ctx, 0)
+	check(C.EVP_CipherInit_ex(c.ctx, nil, nil, (*C.uchar)(&key[0]), ivp, -1))
 	return c
 }
 
 func (c *Cipher) KeySize() int {
-	return int(C.EVP_CIPHER_key_length(c.cipher))
+	return int(C.EVP_CIPHER_CTX_key_length(c.cipher))
 }
 
 func (c *Cipher) BlockSize() int {
-	return int(C.EVP_CIPHER_block_size(c.cipher))
+	return int(C.EVP_CIPHER_CTX_block_size(c.cipher))
 }
 
 func (c *Cipher) Update(in, out []byte) int {
