@@ -20,7 +20,6 @@ func init() {
 	okapi.SHA256 = SHA256
 	okapi.SHA384 = SHA384
 	okapi.SHA512 = SHA512
-	okapi.RIPEMD160 = RIPEMD160
 }
 
 type Hash struct {
