@@ -18,3 +18,13 @@ Status
 
 * libcrypto implementation is under active development hashes and symmetric ciphers should be mostly functional
 * mscng implementation has only a sketch of hash implementation currently, may not even compile yet
+
+TODO
+
+ [ ] cipher tests libcrypto
+ [ ] cipher tests okapi
+ [ ] cipher documentation
+ [ ] implement pkey libcrypto
+ [ ] pkey documentation
+ [ ] catch up with mscng
+ [ ] add go-crypto implementation
