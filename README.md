@@ -25,5 +25,6 @@ TODO
  - [ ] cipher documentation
  - [ ] implement pkey libcrypto
  - [ ] pkey documentation
+ - [ ] add hmac support to hashes
  - [ ] catch up with mscng
  - [ ] add go-crypto implementation
