@@ -9,6 +9,7 @@ package libcrypto
 import "C"
 import (
 	"github.com/mkobetic/okapi"
+	"unsafe"
 )
 
 func init() {
@@ -90,6 +91,14 @@ func (c *Cipher) KeySize() int {
 
 func (c *Cipher) BlockSize() int {
 	return int(C.EVP_CIPHER_CTX_block_size(c.ctx))
+}
+
+func (c *Cipher) GCMGetTag(out []byte) int {
+	return int(C.EVP_CIPHER_CTX_ctrl(c.ctx, C.EVP_CTRL_GCM_GET_TAG, C.int(len(out)), unsafe.Pointer(&out[0])))
+}
+
+func (c *Cipher) GCMSetTag(in []byte) int {
+	return int(C.EVP_CIPHER_CTX_ctrl(c.ctx, C.EVP_CTRL_GCM_SET_TAG, C.int(len(in)), unsafe.Pointer(&in[0])))
 }
 
 func (c *Cipher) Update(in, out []byte) int {

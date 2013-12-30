@@ -120,3 +120,38 @@ func TestAES_CTR(t *testing.T) {
 		t.Fatal("Decrypted does not match plain")
 	}
 }
+
+func TestAES_GCM(t *testing.T) {
+	key := make([]byte, 16)
+	// In GCM mode the IV is the counter
+	iv := make([]byte, 16) // all zeros
+	aes := AES_GCM(key, iv, true).(*Cipher)
+	defer aes.Close()
+	plain := make([]byte, 155) // intentionally not a multiple of block length
+	for i := 0; i < len(plain); i += 1 {
+		plain[i] = byte(i)
+	}
+	encrypted := make([]byte, len(plain))
+	count := aes.Update([]byte(plain), encrypted)
+	if count != len(plain) {
+		t.Fatalf("Wrong encryption byte count: %d", count)
+	}
+	count = aes.Finish(encrypted[count:])
+	if count != 0 {
+		t.Fatalf("Wrong encryption finish count: %d", count)
+	}
+	tag := make([]byte, 16)
+	aes.GCMGetTag(tag)
+	aes = AES_GCM(key, iv, false).(*Cipher)
+	defer aes.Close()
+	aes.GCMSetTag(tag)
+	decrypted := make([]byte, len(plain))
+	count = aes.Update(encrypted, decrypted)
+	if count != len(plain) {
+		t.Fatalf("Wrong decryption byte count: %d", count)
+	}
+	aes.Finish(nil) // this shouldn't panic if authentication checks out
+	if !bytes.Equal(decrypted, plain) {
+		t.Fatal("Decrypted does not match plain")
+	}
+}
