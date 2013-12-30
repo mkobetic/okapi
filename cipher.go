@@ -11,6 +11,9 @@ The Cipher API is deliberately simple and consequently somewhat less convenient,
 type Cipher interface {
 	// Update processes input slice and writes the result into the output slice and returns the number of input bytes processed.
 	Update(in, out []byte) int
+	// Finish completes the last block of data and writes out whatever is left in the internal buffers and returns the number of bytes written. If the configured cipher mode requires multiples of block size of input (e.g. ECB, CBC), Finish will panic if that condition wasn't met.
+	// Update calls are not allowed after Finish is called.
+	Finish(out []byte) int
 	// BlockSize returns the block size in bytes of the underlying encryption algorithm. For stream ciphers the block size is 1.
 	BlockSize() int
 	// KeySize returns the size of the encryption key in bytes. For some algorithms it is constant for others it can be variable.

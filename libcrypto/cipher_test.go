@@ -3,10 +3,11 @@
 package libcrypto
 
 import (
+	"bytes"
 	"testing"
 )
 
-func TestEvpCipher(t *testing.T) {
+func TestRC4(t *testing.T) {
 	key := []byte("open sesame")
 	rc4 := RC4(key, nil, true)
 	defer rc4.Close()
@@ -17,17 +18,25 @@ func TestEvpCipher(t *testing.T) {
 	encrypted := make([]byte, len(plain))
 	count := rc4.Update([]byte(plain), encrypted)
 	if count != 4 {
-		t.Fail()
+		t.Fatalf("Wrong encryption byte count: %d", count)
+	}
+	count = rc4.Finish(encrypted[count:])
+	if count != 0 {
+		t.Fatalf("Wrong encryption finish count: %d", count)
 	}
 	rc4 = RC4(key, nil, false)
 	defer rc4.Close()
 	decrypted := make([]byte, len(plain))
 	count = rc4.Update(encrypted, decrypted)
 	if count != 4 {
-		t.Fail()
+		t.Fatalf("Wrong decryption byte count: %d", count)
+	}
+	count = rc4.Finish(decrypted[count:])
+	if count != 0 {
+		t.Fatalf("Wrong decryption finish count: %d", count)
 	}
 	if string(decrypted) != plain {
-		t.Fail()
+		t.Fatal("Decrypted does not match plain")
 	}
 }
 
@@ -39,20 +48,72 @@ func TestAES_CBC(t *testing.T) {
 	if aes.BlockSize() != 16 {
 		t.Fatal("Wrong block Size")
 	}
-	plain := "a block's worth!"
-	encrypted := make([]byte, len(plain))
-	count := aes.Update([]byte(plain), encrypted)
-	if count != 16 {
+	plain := make([]byte, 100)
+	for i := 0; i < len(plain); i += 1 {
+		plain[i] = byte(i)
+	}
+	var count int = 0
+	encrypted := make([]byte, len(plain)*16)
+	for i := 0; i < len(encrypted); i += 100 {
+		count += aes.Update(plain, encrypted[count:])
+	}
+	if count != len(encrypted) {
 		t.Fatalf("Wrong encryption byte count: %d", count)
+	}
+	count = aes.Finish(encrypted[count:])
+	if count != 0 {
+		t.Fatalf("Wrong encryption finish count: %d", count)
 	}
 	aes = AES_CBC(key, iv, false)
 	defer aes.Close()
-	decrypted := make([]byte, len(plain))
-	count = aes.Update(encrypted, decrypted)
-	if count != 16 {
+	count = 0
+	decrypted := make([]byte, len(plain)*16)
+	for i := 0; i < len(encrypted); i += 100 {
+		count += aes.Update(encrypted[i:i+100], decrypted[count:])
+	}
+	if count != len(decrypted) {
 		t.Fatalf("Wrong decryption byte count: %d", count)
 	}
-	if string(decrypted) != plain {
+	count = aes.Finish(decrypted[count:])
+	if count != 0 {
+		t.Fatalf("Wrong decryption finish count: %d", count)
+	}
+	for i := 0; i < len(encrypted); i += 100 {
+		if !bytes.Equal(decrypted[i:i+100], plain) {
+			t.Fatalf("Decrypted chunk at %d does not match plain", i)
+		}
+	}
+}
+
+func TestAES_CTR(t *testing.T) {
+	key := make([]byte, 32)
+	// In CTR mode the IV is the counter
+	iv := make([]byte, 16) // all zeros
+	aes := AES_CTR(key, iv, true)
+	defer aes.Close()
+	plain := make([]byte, 155) // intentionally not a multiple of block length
+	for i := 0; i < len(plain); i += 1 {
+		plain[i] = byte(i)
+	}
+	encrypted := make([]byte, len(plain))
+	count := aes.Update([]byte(plain), encrypted)
+	if count != len(plain) {
+		t.Fatalf("Wrong encryption byte count: %d", count)
+	}
+	count = aes.Finish(encrypted[count:])
+	if count != 0 {
+		t.Fatalf("Wrong encryption finish count: %d", count)
+	}
+	// let's decrypt from 9th block on
+	iv[15] = 8
+	aes = AES_CTR(key, iv, false)
+	defer aes.Close()
+	decrypted := make([]byte, len(plain)-(8*16))
+	count = aes.Update(encrypted[8*16:], decrypted)
+	if count != len(plain)-8*16 {
+		t.Fatalf("Wrong decryption byte count: %d", count)
+	}
+	if !bytes.Equal(decrypted, plain[16*8:]) {
 		t.Fatal("Decrypted does not match plain")
 	}
 }

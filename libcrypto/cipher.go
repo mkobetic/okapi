@@ -98,6 +98,16 @@ func (c *Cipher) Update(in, out []byte) int {
 	return int(outl)
 }
 
+func (c *Cipher) Finish(out []byte) int {
+	var outl C.int
+	var output *C.uchar
+	if out != nil && len(out) != 0 {
+		output = (*C.uchar)(&out[0])
+	}
+	check(C.EVP_CipherFinal_ex(c.ctx, output, &outl))
+	return int(outl)
+}
+
 func (c *Cipher) Close() {
 	if c.ctx == nil {
 		return
