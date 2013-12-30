@@ -3,14 +3,13 @@ Okapi is a collection of interfaces providing universal API to third-party crypt
 Usage
 =====
 
-An application will need to import both the general okapi package to get access to the API, but also any implementation packages that it wants to employ. However if the application doesn't use any implementation specific types directly Go will complain about an unused import, therefore in this case a [blank import](http://golang.org/doc/effective_go.html#blank_import) of the implementation has to be used, for example:
+An application will need to import both the general okapi package to get access to the API, but also any implementation packages that it wants to employ. However if the application doesn't use any implementation specific types directly, which should be the usual case, Go will complain about an unused import. In this case a [blank import](http://golang.org/doc/effective_go.html#blank_import) of the implementation has to be used, for example:
 
 ```go
 import (
   "github.com/mkobetic/okapi"
   _ "github.com/mkobetic/okapi/libcrypto"
 )
-
 ``` 
 
 Status
@@ -21,10 +20,10 @@ Status
 
 TODO
 
- * [ ] cipher tests libcrypto
- * [ ] cipher tests okapi
- * [ ] cipher documentation
- * [ ] implement pkey libcrypto
- * [ ] pkey documentation
- * [ ] catch up with mscng
- * [ ] add go-crypto implementation
+ - [ ] cipher tests libcrypto
+ - [ ] cipher tests okapi
+ - [ ] cipher documentation
+ - [ ] implement pkey libcrypto
+ - [ ] pkey documentation
+ - [ ] catch up with mscng
+ - [ ] add go-crypto implementation
