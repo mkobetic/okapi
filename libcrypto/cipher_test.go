@@ -12,7 +12,10 @@ func TestRC4(t *testing.T) {
 	rc4 := RC4(key, nil, true)
 	defer rc4.Close()
 	if rc4.BlockSize() != 1 {
-		t.Fail()
+		t.Fatal("Invalid block size")
+	}
+	if rc4.KeySize() != len(key) {
+		t.Fatal("Invalid key size")
 	}
 	plain := "test"
 	encrypted := make([]byte, len(plain))
