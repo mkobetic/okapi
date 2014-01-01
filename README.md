@@ -20,11 +20,11 @@ Status
 
 TODO
 
- - [ ] cipher tests libcrypto
- - [ ] cipher tests okapi
- - [ ] cipher documentation
- - [ ] implement pkey libcrypto
- - [ ] pkey documentation
- - [ ] add hmac support to hashes
- - [ ] catch up with mscng
- - [ ] add go-crypto implementation
+ * CipherReader/Writer 
+ * cipher tests okapi
+ * cipher documentation
+ * implement pkey libcrypto
+ * pkey documentation
+ * add hmac support to hashes
+ * catch up with mscng
+ * add go-crypto implementation

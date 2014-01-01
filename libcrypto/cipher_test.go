@@ -43,6 +43,21 @@ func TestRC4(t *testing.T) {
 	}
 }
 
+func TestBlockWrites(t *testing.T) {
+	bf := BF_CBC([]byte("open sesame!"), []byte("12345678"), true)
+	defer bf.Close()
+	plain := []byte("0123456789abcdefghijklmnopqrstuvxyz")
+	encrypted := make([]byte, 30)
+	count := bf.Update(plain[:13], encrypted)
+	if count != 8 {
+		t.Fatal("Wrong count: %d", count)
+	}
+	count = bf.Update(plain, encrypted[:12])
+	if count != 12 {
+		t.Fatal("Wrong count: %d", count)
+	}
+}
+
 func TestAES_CBC(t *testing.T) {
 	key := []byte("0123456789ABCDEF")
 	iv := []byte("0123456789ABCDEF")
