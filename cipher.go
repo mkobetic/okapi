@@ -37,10 +37,9 @@ var (
 var DefaultBufferSize = 16 * 1024
 
 type CipherWriter struct {
-	output     io.Writer
-	buffer     []byte
-	unconsumed uint
-	cipher     Cipher
+	output io.Writer
+	buffer []byte
+	cipher Cipher
 }
 
 func NewCipherWriter(out io.Writer, cc CipherConstructor, key, iv, buffer []byte) *CipherWriter {

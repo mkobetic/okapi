@@ -24,9 +24,12 @@ type Hash interface {
 	Close()
 }
 
-// Factory functions for known hash algorithms, provided by implementation packages
+// HashConstructors are used to create instances of Hashes.
+type HashConstructor func() Hash
+
+// Predefined HashConstructors for known hash algorithms, provided by implementation packages
 var (
 	MD4, MD5, SHA1,
 	SHA224, SHA256, SHA384, SHA512,
-	RIPEMD160 func() Hash
+	RIPEMD160 HashConstructor
 )
