@@ -6,15 +6,16 @@ import (
 
 /*
 Cipher is a symmetric/secret key encryption algorithm, meaning the same key is used to both encrypt and decrypt the data and therefore must be kept secret.
-The Cipher API is deliberately simple and consequently somewhat less convenient, CipherWriter and CipherReader should be preferred whenever possible.
+The Cipher API is deliberately simple and consequently somewhat less convenient, CipherWriter and CipherReader should be used instead whenever possible.
 */
 type Cipher interface {
-	// Update processes input slice and writes the result into the output slice and returns the number of bytes written.
-	Update(in, out []byte) int
+	// Update processes input slice and writes the result into the output slice and returns the number of bytes read and written.
+	// Update will return with no progress (0,0), if there is not at least a block size worth of room in out slice.
+	Update(in, out []byte) (ins, outs int)
 	// Finish completes the last block of data and writes out whatever is left in the internal buffers and returns the number of bytes written. If the configured cipher mode requires multiples of block size of input (e.g. ECB, CBC), Finish will panic if that condition wasn't met.
 	// Update calls are not allowed after Finish is called.
 	Finish(out []byte) int
-	// BlockSize returns the block size in bytes of the underlying encryption algorithm. For stream ciphers the block size is 1.
+	// BlockSize returns the block size of the underlying encryption algorithm in bytes. For stream ciphers the block size is 1.
 	BlockSize() int
 	// KeySize returns the size of the encryption key in bytes. For some algorithms it is constant for others it can be variable.
 	KeySize() int
@@ -25,7 +26,7 @@ type Cipher interface {
 // CipherConstructors are used to create instances of Ciphers from a secret key, optional initialization vector (iv) and a boolean indicating whether the cipher instance will be used for encryption or decryption.
 type CipherConstructor func(key, iv []byte, encrypt bool) Cipher
 
-// Predefined CipherConstructors for known encryption algorithms and modes, implementations are provided by subpackages. Note that different implementations can support different set of algorithms/modes. If given algorithm/mode combination is not supported, the value of the corresponding variable will be nil.
+// Predefined CipherConstructors for known encryption algorithms and modes, implementations are provided by subpackages. Note that different implementations can support different set of algorithms/modes. If given algorithm/mode combination is not supported by the imported implementations, the value of the corresponding variable will be nil.
 var (
 	AES_ECB, AES_CBC, AES_OFB, AES_CFB, AES_CTR, AES_GCM,
 	BF_ECB, BF_CBC, BF_OFB, BF_CFB,
@@ -51,13 +52,14 @@ func NewCipherWriter(out io.Writer, cc CipherConstructor, key, iv, buffer []byte
 
 func (w *CipherWriter) Write(in []byte) (int, error) {
 	var (
-		total     = 0
-		encrypted = 0
+		total = 0
+		ins   = 0
+		outs  = 0
 	)
 	for total < len(in) {
-		encrypted = w.cipher.Update(in[total:], w.buffer)
-		total += encrypted
-		_, err := w.output.Write(w.buffer[:encrypted])
+		ins, outs = w.cipher.Update(in[total:], w.buffer)
+		total += ins
+		_, err := w.output.Write(w.buffer[:outs])
 		if err != nil {
 			return total, err
 		}

@@ -25,8 +25,10 @@ func init() {
 }
 
 type Cipher struct {
-	ctx    *C.EVP_CIPHER_CTX
-	cipher *C.EVP_CIPHER // libcrypto constant
+	ctx       *C.EVP_CIPHER_CTX
+	cipher    *C.EVP_CIPHER // libcrypto constant
+	buffered  int           //how many input bytes are buffered
+	blockSize int           // caches the cipher block size
 }
 
 func RC4(key, iv []byte, encrypt bool) okapi.Cipher {
@@ -67,6 +69,7 @@ func DES3_OFB(key, iv []byte, encrypt bool) okapi.Cipher {
 
 func NewCipher(algorithm *C.EVP_CIPHER, key, iv []byte, encrypt bool) okapi.Cipher {
 	c := &Cipher{cipher: algorithm}
+	c.blockSize = int(C.EVP_CIPHER_block_size(algorithm))
 	c.ctx = new(C.EVP_CIPHER_CTX)
 	C.EVP_CIPHER_CTX_init(c.ctx)
 
@@ -80,7 +83,7 @@ func NewCipher(algorithm *C.EVP_CIPHER, key, iv []byte, encrypt bool) okapi.Ciph
 	}
 	check(C.EVP_CipherInit_ex(c.ctx, algorithm, nil, nil, nil, enc))
 	C.EVP_CIPHER_CTX_set_key_length(c.ctx, C.int(len(key)))
-	C.EVP_CIPHER_CTX_set_padding(c.ctx, 0)
+	C.EVP_CIPHER_CTX_set_padding(c.ctx, 0) // No padding
 	check(C.EVP_CipherInit_ex(c.ctx, nil, nil, (*C.uchar)(&key[0]), ivp, -1))
 	return c
 }
@@ -90,7 +93,7 @@ func (c *Cipher) KeySize() int {
 }
 
 func (c *Cipher) BlockSize() int {
-	return int(C.EVP_CIPHER_CTX_block_size(c.ctx))
+	return c.blockSize
 }
 
 func (c *Cipher) GCMGetTag(out []byte) int {
@@ -101,10 +104,22 @@ func (c *Cipher) GCMSetTag(in []byte) int {
 	return int(C.EVP_CIPHER_CTX_ctrl(c.ctx, C.EVP_CTRL_GCM_SET_TAG, C.int(len(in)), unsafe.Pointer(&in[0])))
 }
 
-func (c *Cipher) Update(in, out []byte) int {
-	var outl C.int
-	check(C.EVP_CipherUpdate(c.ctx, (*C.uchar)(&out[0]), &outl, (*C.uchar)(&in[0]), C.int(len(in))))
-	return int(outl)
+func (c *Cipher) Update(in, out []byte) (int, int) {
+	if len(out) < c.blockSize {
+		return 0, 0
+	}
+	var outl, inl C.int
+	if len(in)+c.buffered > len(out) {
+		inl = C.int(len(out) - c.buffered)
+	} else {
+		inl = C.int(len(in))
+	}
+	check(C.EVP_CipherUpdate(c.ctx, (*C.uchar)(&out[0]), &outl, (*C.uchar)(&in[0]), inl))
+	c.buffered = c.buffered + int(inl) - int(outl)
+	if c.buffered >= c.blockSize {
+		panic("Unprocessed input exeeded block size!")
+	}
+	return int(inl), int(outl)
 }
 
 func (c *Cipher) Finish(out []byte) int {
