@@ -19,12 +19,11 @@ Status
 * mscng implementation has only a sketch of hash implementation currently, may not even compile yet
 
 TODO
+====
 
- * CipherReader/Writer 
- * cipher tests okapi
- * cipher documentation
  * implement pkey libcrypto
  * pkey documentation
  * add hmac support to hashes
+ * add random support
  * catch up with mscng
  * add go-crypto implementation
