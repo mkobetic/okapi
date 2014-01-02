@@ -27,7 +27,7 @@ func init() {
 type Cipher struct {
 	ctx       *C.EVP_CIPHER_CTX
 	cipher    *C.EVP_CIPHER // libcrypto constant
-	buffered  int           //how many input bytes are buffered
+	buffered  int           // how many input bytes are buffered/unprocessed <0,blockSize)
 	blockSize int           // caches the cipher block size
 }
 
@@ -94,6 +94,10 @@ func (c *Cipher) KeySize() int {
 
 func (c *Cipher) BlockSize() int {
 	return c.blockSize
+}
+
+func (c *Cipher) BufferedSize() int {
+	return c.buffered
 }
 
 func (c *Cipher) GCMGetTag(out []byte) int {
