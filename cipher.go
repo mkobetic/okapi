@@ -1,7 +1,5 @@
 package okapi
 
-var DefaultBufferSize = 16 * 1024
-
 /*
 Cipher is a symmetric/secret key encryption algorithm, meaning the same key is used to both encrypt and decrypt the data and therefore must be kept secret.
 The Cipher API is deliberately simple and consequently somewhat less convenient, CipherWriter and CipherReader should be used instead whenever possible.

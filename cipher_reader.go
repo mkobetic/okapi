@@ -68,11 +68,3 @@ func (r *CipherReader) Close() error {
 	}
 	return errors.New("Unfinished cipher block")
 }
-
-func min(a, b int) int {
-	if a < b {
-		return a
-	} else {
-		return b
-	}
-}
