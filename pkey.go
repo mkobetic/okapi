@@ -16,11 +16,14 @@ type KeyConstructor func(parameters interface{}) (*PrivateKey, error)
 // Predefined key constructors for known algorithms and purposes, implementations are provided by subpackages. Note that different implementations can support different set of algorithms/purposes. If given algorithm/purpose combination is not supported by the imported implementations, the value of the corresponding variable will be nil.
 var (
 	// encryption
-	RSA
-	// signing
-	RSA_MD5, RSA_SHA1, RSA_SHA224, RSA_SHA256, RSA_384, RSA_SHA512
-	DSA_SHA1, DSA_224, DSA_SHA256, DSA_384, DSA_SHA512
-	ECDSA_SHA1, ECDSA_224, ECDSA_SHA256, ECDSA_384, ECDSA_SHA512
+	RSA_PKCS1, RSA_OAEP,
+	// signing PKCS1v1.5
+	RSA_PKCS1_MD5, RSA_PKCS1_SHA1, RSA_PKCS1_SHA224, RSA_PKCS1_SHA256, RSA_PKCS1_SHA384, RSA_PKCS1_SHA512,
+	// signing PKCS1v2.0
+	RSA_PSS_MD5, RSA_PSS_SHA1, RSA_PSS_SHA224, RSA_PSS_SHA256, RSA_PSS_SHA384, RSA_PSS_SHA512,
+	// signing DSS
+	DSA_SHA1, DSA_SHA224, DSA_SHA256, DSA_SHA384, DSA_SHA512,
+	ECDSA_SHA1, ECDSA_224, ECDSA_SHA256, ECDSA_384, ECDSA_SHA512,
 	// key agreement
 	DH, ECDH KeyConstructor
 )
