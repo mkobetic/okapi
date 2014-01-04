@@ -7,19 +7,18 @@ import (
 	"testing"
 )
 
-func TestRSA(t *testing.T) {
-	pri := RSASize(2048)
+func TestGenerateRSA(t *testing.T) {
+	pri := RSA_15(2048)
+	defer pri.Close()
 	pub := pri.PublicKey()
-	plain := []byte("Message in a bottle!")
-	encrypted := pub.Encrypt(plain)
-	decrypted := pri.Decrypt(encrypted)
+	defer pub.Close()
 	if !bytes.Equal(plain, decrypted) {
 		t.Fatal("RSA decryption failed")
 	}
 }
 
-func TestDSA_SHA256(t *testing.T) {
-	pri := DSA_SHA256Size(2048)
+func TestRSA_OAEP(t *testing.T) {
+	pri := RSA_OAEP(sample1024RSAKey)
 	pub := pri.PublicKey()
 	plain := []byte("Message in a bottle!")
 	encrypted := pub.Encrypt(plain)

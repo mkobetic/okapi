@@ -1,9 +1,5 @@
 package okapi
 
-import (
-	"math/big"
-)
-
 // KeyConstructor creates a PrivateKey for given algorithm and purpose.
 // The parameters contain the required constituents of the key
 // which are algorithm and key type specific.
@@ -15,11 +11,11 @@ type KeyConstructor func(parameters interface{}) (*PrivateKey, error)
 
 // Predefined key constructors for known algorithms and purposes, implementations are provided by subpackages. Note that different implementations can support different set of algorithms/purposes. If given algorithm/purpose combination is not supported by the imported implementations, the value of the corresponding variable will be nil.
 var (
-	// encryption
-	RSA_PKCS1, RSA_OAEP,
-	// signing PKCS1v1.5
-	RSA_PKCS1_MD5, RSA_PKCS1_SHA1, RSA_PKCS1_SHA224, RSA_PKCS1_SHA256, RSA_PKCS1_SHA384, RSA_PKCS1_SHA512,
-	// signing PKCS1v2.0
+	// encryption PKCS1 v1.5 & v2.0
+	RSA_15, RSA_OAEP,
+	// signing PKCS1 v1.5
+	RSA_15_MD5, RSA_15_SHA1, RSA_15_SHA224, RSA_15_SHA256, RSA_15_SHA384, RSA_15_SHA512,
+	// signing PKCS1 v2.0
 	RSA_PSS_MD5, RSA_PSS_SHA1, RSA_PSS_SHA224, RSA_PSS_SHA256, RSA_PSS_SHA384, RSA_PSS_SHA512,
 	// signing DSS
 	DSA_SHA1, DSA_SHA224, DSA_SHA256, DSA_SHA384, DSA_SHA512,
@@ -29,7 +25,7 @@ var (
 )
 
 // PrivateKey provides private key operations for given public key algorithm and purpose.
-// The purpose determins which operations are available:
+// The purpose determines which operations are available:
 // * encryption: Decrypt
 // * signing: Sign
 // * key agreement: Derive
@@ -50,7 +46,7 @@ type PrivateKey interface {
 }
 
 // PublicKey provides public key operations for given public key algorithm and purpose.
-// The purpose determins which operations are available:
+// The purpose determines which operations are available:
 // * encryption: Encrypt
 // * signing: Verify
 type PublicKey interface {
