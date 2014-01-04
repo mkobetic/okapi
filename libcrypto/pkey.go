@@ -12,6 +12,7 @@ import "C"
 import (
 	"errors"
 	"github.com/mkobetic/okapi"
+	"math/big"
 	"unsafe"
 )
 
@@ -38,7 +39,6 @@ func (key *PrivateKey) PublicKey() okapi.PublicKey {
 		panic("Key conversion failed (i2d)")
 	}
 	pkey := C.d2i_PublicKey(C.EVP_PKEY_id(key.pkey), nil, &buffer, C.long(blen))
-	// pkey := C.pri2pub(key.pkey)
 	if pkey == nil {
 		panic("PrivateKey to PublicKey conversion failed!")
 	}
@@ -51,13 +51,25 @@ func (key *PrivateKey) KeySize() int {
 	return int(C.EVP_PKEY_bits(key.pkey))
 }
 
-func RSA_15(parameters interface{}) (okapi.PrivateKey, error) {
+func NewPrivateKey(keyType C.int, parameters interface{}) (okapi.PrivateKey, error) {
 	switch parameters := parameters.(type) {
+	case int:
+		return NewPrivateKeySize(keyType, parameters)
+	case []*big.Int:
+		return NewPrivateKeyElements(keyType, parameters)
 	case string:
 		return NewPrivateKeyPEM([]byte(parameters))
 	default:
 		return nil, errors.New("Invalid Parameters")
 	}
+}
+
+func NewPrivateKeySize(keyType C.int, size int) (okapi.PrivateKey, error) {
+	return nil, nil
+}
+
+func NewPrivateKeyElements(keyType C.int, elements []*big.Int) (okapi.PrivateKey, error) {
+	return nil, nil
 }
 
 func NewPrivateKeyPEM(pem []byte) (okapi.PrivateKey, error) {

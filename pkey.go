@@ -7,7 +7,7 @@ package okapi
 // a partially initialized PrivateKey that can only be used to obtain a PublicKey from it.
 // The parameters may also contain key generation parameters
 // in which case a full PrivateKey will be generated
-type KeyConstructor func(parameters interface{}) (*PrivateKey, error)
+type KeyConstructor func(parameters interface{}) (PrivateKey, error)
 
 // Predefined key constructors for known algorithms and purposes, implementations are provided by subpackages. Note that different implementations can support different set of algorithms/purposes. If given algorithm/purpose combination is not supported by the imported implementations, the value of the corresponding variable will be nil.
 var (
