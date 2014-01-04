@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func TestCreateRSA_PEM(t *testing.T) {
+func TestReadPrivatePEM_RSA(t *testing.T) {
 	pri, err := RSA_15(pemRSA1024)
 	if err != nil {
 		t.Fatal("Failed reading PEM")

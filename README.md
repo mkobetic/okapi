@@ -10,7 +10,9 @@ import (
   "github.com/mkobetic/okapi"
   _ "github.com/mkobetic/okapi/libcrypto"
 )
-``` 
+```
+
+See tests subdirectory for usage examples, the test files are mostly go testing style examples.
 
 Status
 ======
@@ -21,9 +23,12 @@ Status
 TODO
 ====
 
- * implement pkey libcrypto
- * pkey documentation
- * add hmac support to hashes
- * add random support
- * catch up with mscng
- * add go-crypto implementation
+ * libcrypto: implement pkey
+ * libcrypto: add pkey generation support
+ * libcrypto: add PKCS8 import/export for PrivateKey
+ * libcrypto: add X.509 import/export for PublicKey
+ * libcrypto: add PublicKey construction support
+ * libcrypto: add HMAC support to hashes
+ * libcrypto: add random support
+ * mscng: catch up
+ * gocrypto implementation
