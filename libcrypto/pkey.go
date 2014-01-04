@@ -8,6 +8,7 @@ package libcrypto
 // #include <openssl/pem.h>
 import "C"
 import (
+	"errors"
 	"github.com/mkobetic/okapi"
 	"unsafe"
 )
@@ -16,20 +17,64 @@ type PrivateKey struct {
 	pkey *C.EVP_PKEY
 }
 
-func NewPrivateKeyPEM(pem []byte) okapi.PrivateKey {
+func (key *PrivateKey) Decrypt(encrypted []byte) (decrypted []byte, err error) {
+	return nil, nil
+}
+
+func (key *PrivateKey) Sign(digest []byte) (signature []byte, err error) {
+	return nil, nil
+}
+
+func (key *PrivateKey) Derive(pub okapi.PublicKey) (secret []byte, err error) {
+	return nil, nil
+}
+
+func (key *PrivateKey) PublicKey() okapi.PublicKey {
+	return nil
+}
+
+func (key *PrivateKey) Close() {}
+
+func (key *PrivateKey) KeySize() int {
+	return int(C.EVP_PKEY_bits(key.pkey))
+}
+
+func RSA_15(parameters interface{}) (okapi.PrivateKey, error) {
+	switch parameters := parameters.(type) {
+	case string:
+		return NewPrivateKeyPEM([]byte(parameters))
+	default:
+		return nil, errors.New("Invalid Parameters")
+	}
+}
+
+func NewPrivateKeyPEM(pem []byte) (okapi.PrivateKey, error) {
 	bio := C.BIO_new_mem_buf(unsafe.Pointer(&pem[0]), C.int(len(pem)))
 	defer C.BIO_free(bio)
 	pkey := C.PEM_read_bio_PrivateKey(bio, nil, nil, nil)
-	return &PrivateKey{pkey: pkey}
+	if pkey == nil {
+		return nil, errors.New("Invalid PEM input")
+	}
+	return &PrivateKey{pkey: pkey}, nil
 }
 
 type PublicKey struct {
 	pkey *C.EVP_PKEY
 }
 
-func NewPublicKeyPEM(pem []byte) okapi.PrivateKey {
+func NewPublicKeyPEM(pem []byte) okapi.PublicKey {
 	bio := C.BIO_new_mem_buf(unsafe.Pointer(&pem[0]), C.int(len(pem)))
 	defer C.BIO_free(bio)
 	pkey := C.PEM_read_bio_PUBKEY(bio, nil, nil, nil)
-	return &PrivateKey{pkey: pkey}
+	return &PublicKey{pkey: pkey}
 }
+
+func (key *PublicKey) Encrypt(plain []byte) (encrypted []byte, err error) {
+	return nil, nil
+}
+
+func (key *PublicKey) Verify(signature []byte, digest []byte) (valid bool, err error) {
+	return false, nil
+}
+
+func (key *PublicKey) Close() {}

@@ -38,9 +38,9 @@ type PrivateKey interface {
 	Sign(digest []byte) (signature []byte, err error)
 	// Derive generates a shared secret from the public key
 	// provided by the other participant of the key agreement
-	Derive(pub PublicKey) (secret []byte, err error)
+	Derive(peer PublicKey) (secret []byte, err error)
 	// Extract a PublicKey from the PrivateKey
-	PublicKey() *PublicKey
+	PublicKey() PublicKey
 	// Close MUST be called before discarding a key instance to securely discard and release any associated resources.
 	Close()
 }
