@@ -16,8 +16,8 @@ func TestGenerateRSA(t *testing.T) {
 	if key.KeySize() != 1024 {
 		t.Fatal("Invalid key size!")
 	}
-	// pub := pri.PublicKey()
-	// defer pub.Close()
+	pub := pri.PublicKey()
+	defer pub.Close()
 }
 
 // func TestRSA_OAEP(t *testing.T) {

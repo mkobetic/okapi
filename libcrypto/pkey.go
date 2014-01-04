@@ -2,10 +2,12 @@
 
 package libcrypto
 
-// #cgo LDFLAGS:  -L/usr/local/opt/openssl/lib -lcrypto
-// #cgo CFLAGS: -I/usr/local/opt/openssl/include
-// #include <openssl/evp.h>
-// #include <openssl/pem.h>
+/*
+#cgo LDFLAGS:  -L/usr/local/opt/openssl/lib -lcrypto
+#cgo CFLAGS: -I/usr/local/opt/openssl/include
+#include <openssl/evp.h>
+#include <openssl/pem.h>
+*/
 import "C"
 import (
 	"errors"
@@ -30,7 +32,17 @@ func (key *PrivateKey) Derive(pub okapi.PublicKey) (secret []byte, err error) {
 }
 
 func (key *PrivateKey) PublicKey() okapi.PublicKey {
-	return nil
+	var buffer *C.uchar
+	blen := int(C.i2d_PublicKey(key.pkey, &buffer))
+	if blen < 0 {
+		panic("Key conversion failed (i2d)")
+	}
+	pkey := C.d2i_PublicKey(C.EVP_PKEY_id(key.pkey), nil, &buffer, C.long(blen))
+	// pkey := C.pri2pub(key.pkey)
+	if pkey == nil {
+		panic("PrivateKey to PublicKey conversion failed!")
+	}
+	return &PublicKey{pkey: pkey}
 }
 
 func (key *PrivateKey) Close() {}
