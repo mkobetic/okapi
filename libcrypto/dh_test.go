@@ -10,7 +10,7 @@ import (
 func TestReadPrivatePEM_DH(t *testing.T) {
 	pri, err := newDHKey(pemDH1024Params, DH)
 	if err != nil {
-		t.Fatal("Failed reading PEM")
+		t.Fatalf("Failed reading PEM: %s", err)
 	}
 	defer pri.Close()
 	if pri.KeySize() != 1024 {

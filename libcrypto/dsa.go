@@ -22,25 +22,25 @@ func init() {
 	okapi.DSA_SHA512 = DSA_SHA512.constructor()
 }
 
-type DSAParameters struct {
+type dsaParameters struct {
 	md *C.EVP_MD
 }
 
 var (
-	DSA_SHA1   = DSAParameters{C.EVP_sha1()}
-	DSA_SHA224 = DSAParameters{C.EVP_sha224()}
-	DSA_SHA256 = DSAParameters{C.EVP_sha256()}
-	DSA_SHA384 = DSAParameters{C.EVP_sha384()}
-	DSA_SHA512 = DSAParameters{C.EVP_sha512()}
+	DSA_SHA1   = dsaParameters{C.EVP_sha1()}
+	DSA_SHA224 = dsaParameters{C.EVP_sha224()}
+	DSA_SHA256 = dsaParameters{C.EVP_sha256()}
+	DSA_SHA384 = dsaParameters{C.EVP_sha384()}
+	DSA_SHA512 = dsaParameters{C.EVP_sha512()}
 )
 
-func (p DSAParameters) constructor() okapi.KeyConstructor {
+func (p dsaParameters) constructor() okapi.KeyConstructor {
 	return func(keyParameters interface{}) (okapi.PrivateKey, error) {
 		return newDSAKey(keyParameters, p)
 	}
 }
 
-func (p DSAParameters) configure(key *PKey) {
+func (p dsaParameters) configure(key *PKey) {
 	key.parameters = p
 	if key.public {
 		check1(C.EVP_PKEY_verify_init(key.ctx))
@@ -52,15 +52,15 @@ func (p DSAParameters) configure(key *PKey) {
 	checkP(C.EVP_PKEY_CTX_ctrl(key.ctx, -1, C.EVP_PKEY_OP_TYPE_SIG, C.EVP_PKEY_CTRL_MD, 0, unsafe.Pointer(p.md)))
 }
 
-func (p DSAParameters) isForEncryption() bool   { return false }
-func (p DSAParameters) isForSigning() bool      { return true }
-func (p DSAParameters) isForKeyAgreement() bool { return false }
+func (p dsaParameters) isForEncryption() bool   { return false }
+func (p dsaParameters) isForSigning() bool      { return true }
+func (p dsaParameters) isForKeyAgreement() bool { return false }
 
-func newDSAKey(keyParameters interface{}, dsaParameters DSAParameters) (*PKey, error) {
-	key, err := newPKey(C.EVP_PKEY_DSA, keyParameters)
+func newDSAKey(kps interface{}, dsaps dsaParameters) (*PKey, error) {
+	key, err := newPKey(C.EVP_PKEY_DSA, kps)
 	if err != nil {
 		return key, err
 	}
-	dsaParameters.configure(key)
+	dsaps.configure(key)
 	return key, nil
 }

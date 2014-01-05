@@ -17,35 +17,35 @@ func init() {
 	okapi.DH = DH.constructor()
 }
 
-type DHParameters struct {
+type dhParameters struct {
 }
 
 var (
-	DH = DHParameters{}
+	DH = dhParameters{}
 )
 
-func (p DHParameters) constructor() okapi.KeyConstructor {
+func (p dhParameters) constructor() okapi.KeyConstructor {
 	return func(keyParameters interface{}) (okapi.PrivateKey, error) {
 		return newDHKey(keyParameters, p)
 	}
 }
 
-func (p DHParameters) configure(key *PKey) {
+func (p dhParameters) configure(key *PKey) {
 	key.parameters = p
 	if !key.public {
 		check1(C.EVP_PKEY_derive_init(key.ctx))
 	}
 }
 
-func (p DHParameters) isForEncryption() bool   { return false }
-func (p DHParameters) isForSigning() bool      { return false }
-func (p DHParameters) isForKeyAgreement() bool { return true }
+func (p dhParameters) isForEncryption() bool   { return false }
+func (p dhParameters) isForSigning() bool      { return false }
+func (p dhParameters) isForKeyAgreement() bool { return true }
 
-func newDHKey(keyParameters interface{}, dhParameters DHParameters) (*PKey, error) {
-	key, err := newPKey(C.EVP_PKEY_DH, keyParameters)
+func newDHKey(kp interface{}, dhp dhParameters) (*PKey, error) {
+	key, err := newPKey(C.EVP_PKEY_DH, kp)
 	if err != nil {
 		return key, err
 	}
-	dhParameters.configure(key)
+	dhp.configure(key)
 	return key, nil
 }

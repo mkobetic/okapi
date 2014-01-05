@@ -31,35 +31,35 @@ func init() {
 	okapi.RSA_PSS_SHA512 = RSA_PSS_SHA512.constructor()
 }
 
-type RSAParameters struct {
+type rsaParameters struct {
 	padding C.int
 	md      *C.EVP_MD
 }
 
 var (
-	RSA            = RSAParameters{C.RSA_PKCS1_PADDING, nil}
-	RSA_OAEP       = RSAParameters{C.RSA_PKCS1_OAEP_PADDING, nil}
-	RSA_MD5        = RSAParameters{C.RSA_PKCS1_PADDING, C.EVP_md5()}
-	RSA_SHA1       = RSAParameters{C.RSA_PKCS1_PADDING, C.EVP_sha1()}
-	RSA_SHA224     = RSAParameters{C.RSA_PKCS1_PADDING, C.EVP_sha224()}
-	RSA_SHA256     = RSAParameters{C.RSA_PKCS1_PADDING, C.EVP_sha256()}
-	RSA_SHA384     = RSAParameters{C.RSA_PKCS1_PADDING, C.EVP_sha384()}
-	RSA_SHA512     = RSAParameters{C.RSA_PKCS1_PADDING, C.EVP_sha512()}
-	RSA_PSS_MD5    = RSAParameters{C.RSA_PKCS1_PSS_PADDING, C.EVP_md5()}
-	RSA_PSS_SHA1   = RSAParameters{C.RSA_PKCS1_PSS_PADDING, C.EVP_sha1()}
-	RSA_PSS_SHA224 = RSAParameters{C.RSA_PKCS1_PSS_PADDING, C.EVP_sha224()}
-	RSA_PSS_SHA256 = RSAParameters{C.RSA_PKCS1_PSS_PADDING, C.EVP_sha256()}
-	RSA_PSS_SHA384 = RSAParameters{C.RSA_PKCS1_PSS_PADDING, C.EVP_sha384()}
-	RSA_PSS_SHA512 = RSAParameters{C.RSA_PKCS1_PSS_PADDING, C.EVP_sha512()}
+	RSA            = rsaParameters{C.RSA_PKCS1_PADDING, nil}
+	RSA_OAEP       = rsaParameters{C.RSA_PKCS1_OAEP_PADDING, nil}
+	RSA_MD5        = rsaParameters{C.RSA_PKCS1_PADDING, C.EVP_md5()}
+	RSA_SHA1       = rsaParameters{C.RSA_PKCS1_PADDING, C.EVP_sha1()}
+	RSA_SHA224     = rsaParameters{C.RSA_PKCS1_PADDING, C.EVP_sha224()}
+	RSA_SHA256     = rsaParameters{C.RSA_PKCS1_PADDING, C.EVP_sha256()}
+	RSA_SHA384     = rsaParameters{C.RSA_PKCS1_PADDING, C.EVP_sha384()}
+	RSA_SHA512     = rsaParameters{C.RSA_PKCS1_PADDING, C.EVP_sha512()}
+	RSA_PSS_MD5    = rsaParameters{C.RSA_PKCS1_PSS_PADDING, C.EVP_md5()}
+	RSA_PSS_SHA1   = rsaParameters{C.RSA_PKCS1_PSS_PADDING, C.EVP_sha1()}
+	RSA_PSS_SHA224 = rsaParameters{C.RSA_PKCS1_PSS_PADDING, C.EVP_sha224()}
+	RSA_PSS_SHA256 = rsaParameters{C.RSA_PKCS1_PSS_PADDING, C.EVP_sha256()}
+	RSA_PSS_SHA384 = rsaParameters{C.RSA_PKCS1_PSS_PADDING, C.EVP_sha384()}
+	RSA_PSS_SHA512 = rsaParameters{C.RSA_PKCS1_PSS_PADDING, C.EVP_sha512()}
 )
 
-func (p RSAParameters) constructor() okapi.KeyConstructor {
+func (p rsaParameters) constructor() okapi.KeyConstructor {
 	return func(keyParameters interface{}) (okapi.PrivateKey, error) {
 		return newRSAKey(keyParameters, p)
 	}
 }
 
-func (p RSAParameters) configure(key *PKey) {
+func (p rsaParameters) configure(key *PKey) {
 	key.parameters = p
 	if p.isForEncryption() {
 		if key.public {
@@ -84,15 +84,15 @@ func (p RSAParameters) configure(key *PKey) {
 	}
 }
 
-func (p RSAParameters) isForEncryption() bool   { return p.md == nil }
-func (p RSAParameters) isForSigning() bool      { return p.md != nil }
-func (p RSAParameters) isForKeyAgreement() bool { return false }
+func (p rsaParameters) isForEncryption() bool   { return p.md == nil }
+func (p rsaParameters) isForSigning() bool      { return p.md != nil }
+func (p rsaParameters) isForKeyAgreement() bool { return false }
 
-func newRSAKey(keyParameters interface{}, rsaParameters RSAParameters) (*PKey, error) {
-	key, err := newPKey(C.EVP_PKEY_RSA, keyParameters)
+func newRSAKey(kps interface{}, rsaps rsaParameters) (*PKey, error) {
+	key, err := newPKey(C.EVP_PKEY_RSA, kps)
 	if err != nil {
 		return key, err
 	}
-	rsaParameters.configure(key)
+	rsaps.configure(key)
 	return key, nil
 }
