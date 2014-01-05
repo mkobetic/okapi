@@ -8,6 +8,7 @@ package libcrypto
 // #include <openssl/err.h>
 import "C"
 import (
+	"errors"
 	"fmt"
 )
 
@@ -15,22 +16,30 @@ func init() {
 	C.ERR_load_crypto_strings()
 }
 
+func error1(err C.int) error {
+	if int(err) == 1 {
+		return nil
+	}
+	return errors.New(libcryptoError())
+}
+
 func check1(err C.int) {
 	if int(err) == 1 {
 		return
 	}
-	code := C.ERR_get_error()
-	function := C.GoString(C.ERR_func_error_string(code))
-	reason := C.GoString(C.ERR_reason_error_string(code))
-	panic(fmt.Sprintf("libcrypto error %x:%s:%s", uint64(code), function, reason))
+	panic(libcryptoError())
 }
 
 func checkP(err C.int) {
 	if int(err) > 0 {
 		return
 	}
+	panic(libcryptoError())
+}
+
+func libcryptoError() string {
 	code := C.ERR_get_error()
 	function := C.GoString(C.ERR_func_error_string(code))
 	reason := C.GoString(C.ERR_reason_error_string(code))
-	panic(fmt.Sprintf("libcrypto error %x:%s:%s", uint64(code), function, reason))
+	return fmt.Sprintf("libcrypto error %x:%s:%s", uint64(code), function, reason)
 }

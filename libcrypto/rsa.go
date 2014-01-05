@@ -74,11 +74,13 @@ func (p RSAParameters) configure(key *PKey) {
 			check1(C.EVP_PKEY_sign_init(key.ctx))
 		}
 	}
+	// following macro didn't work: undeclared?
+	// checkP(C.EVP_PKEY_CTX_set_rsa_padding(key.ctx, p.padding))
 	checkP(C.EVP_PKEY_CTX_ctrl(key.ctx, C.EVP_PKEY_RSA, -1, C.EVP_PKEY_CTRL_RSA_PADDING, p.padding, nil))
-	//checkP(C.EVP_PKEY_CTX_set_rsa_padding(key.ctx, p.padding))
 	if p.md != nil {
+		// following macro didn't work: undeclared?
+		// checkP(C.EVP_PKEY_CTX_set_signature_md(key.ctx, p.md))
 		checkP(C.EVP_PKEY_CTX_ctrl(key.ctx, -1, C.EVP_PKEY_OP_TYPE_SIG, C.EVP_PKEY_CTRL_MD, 0, unsafe.Pointer(p.md)))
-		//checkP(C.EVP_PKEY_CTX_set_signature_md(key.ctx, p.md))
 	}
 }
 

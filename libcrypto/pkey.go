@@ -34,18 +34,30 @@ func (key *PKey) Decrypt(encrypted []byte) (decrypted []byte, err error) {
 	if key.public {
 		return nil, errors.New("Public key cannot decrypt!")
 	}
-	if key.parameters.isForEncryption() {
-		return nil, errors.New("Key is not for encryption!")
+	if !key.parameters.isForEncryption() {
+		return nil, errors.New("Key is not configured for encryption!")
 	}
-	return nil, errors.New("TODO")
+	var outlen C.size_t
+	inlen := C.size_t(len(encrypted))
+	in := (*C.uchar)(&encrypted[0])
+	err = error1(C.EVP_PKEY_decrypt(key.ctx, nil, &outlen, in, inlen))
+	if err != nil {
+		return nil, err
+	}
+	decrypted = make([]byte, int(outlen))
+	err = error1(C.EVP_PKEY_decrypt(key.ctx, (*C.uchar)(&decrypted[0]), &outlen, in, inlen))
+	if err != nil {
+		return nil, err
+	}
+	return decrypted[:int(outlen)], nil
 }
 
 func (key *PKey) Sign(digest []byte) (signature []byte, err error) {
 	if key.public {
 		return nil, errors.New("Public key cannot sign!")
 	}
-	if key.parameters.isForSigning() {
-		return nil, errors.New("Key is not for signing!")
+	if !key.parameters.isForSigning() {
+		return nil, errors.New("Key is not for configured signing!")
 	}
 	return nil, errors.New("TODO")
 }
@@ -54,8 +66,8 @@ func (key *PKey) Derive(pub okapi.PublicKey) (secret []byte, err error) {
 	if key.public {
 		return nil, errors.New("Public key cannot derive!")
 	}
-	if key.parameters.isForKeyAgreement() {
-		return nil, errors.New("Key is not for key agreement!")
+	if !key.parameters.isForKeyAgreement() {
+		return nil, errors.New("Key is not configured for key agreement!")
 	}
 	return nil, errors.New("TODO")
 }
@@ -79,19 +91,32 @@ func (key *PKey) PublicKey() okapi.PublicKey {
 	}
 	pub.public = true
 	pub.parameters = key.parameters
+	pub.parameters.configure(pub)
 	return pub
 }
 
 func (key *PKey) Encrypt(plain []byte) (encrypted []byte, err error) {
-	if key.parameters.isForEncryption() {
-		return nil, errors.New("Key is not for encryption!")
+	if !key.parameters.isForEncryption() {
+		return nil, errors.New("Key is not configured for encryption!")
 	}
-	return nil, errors.New("TODO")
+	var outlen C.size_t
+	inlen := C.size_t(len(plain))
+	in := (*C.uchar)(&plain[0])
+	err = error1(C.EVP_PKEY_encrypt(key.ctx, nil, &outlen, in, inlen))
+	if err != nil {
+		return nil, err
+	}
+	encrypted = make([]byte, int(outlen))
+	err = error1(C.EVP_PKEY_encrypt(key.ctx, (*C.uchar)(&encrypted[0]), &outlen, in, inlen))
+	if err != nil {
+		return nil, err
+	}
+	return encrypted[:int(outlen)], nil
 }
 
 func (key *PKey) Verify(signature []byte, digest []byte) (valid bool, err error) {
-	if key.parameters.isForSigning() {
-		return false, errors.New("Key is not for signing!")
+	if !key.parameters.isForSigning() {
+		return false, errors.New("Key is not configured for signing!")
 	}
 	return false, errors.New("TODO")
 }

@@ -3,6 +3,7 @@
 package libcrypto
 
 import (
+	"bytes"
 	"testing"
 )
 
@@ -19,13 +20,21 @@ func TestReadPrivatePEM_RSA(t *testing.T) {
 	defer pub.Close()
 }
 
-// func TestRSA_OAEP(t *testing.T) {
-// 	pri, _ := RSA_OAEP(sample1024RSAKey)
-// 	pub := pri.PublicKey()
-// 	plain := []byte("Message in a bottle!")
-// 	encrypted := pub.Encrypt(plain)
-// 	decrypted := pri.Decrypt(encrypted)
-// 	if !bytes.Equal(plain, decrypted) {
-// 		t.Fatal("RSA decryption failed")
-// 	}
-// }
+func TestRSA_OAEP(t *testing.T) {
+	pri, _ := newRSAKey(pemRSA1024, RSA_OAEP)
+	defer pri.Close()
+	pub := pri.PublicKey().(*PKey)
+	defer pub.Close()
+	plain := []byte("Message in a bottle!")
+	encrypted, err := pub.Encrypt(plain)
+	if err != nil {
+		t.Fatalf("Encryption failed: %s", err)
+	}
+	decrypted, err := pri.Decrypt(encrypted)
+	if err != nil {
+		t.Fatalf("Decryption failed: %s", err)
+	}
+	if !bytes.Equal(plain, decrypted) {
+		t.Fatalf("Result mismatch\nPlain    : %x\nEncrypted: %x\nDecrypted: %x\n", plain, encrypted, decrypted)
+	}
+}
