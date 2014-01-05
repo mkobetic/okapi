@@ -61,6 +61,19 @@ func (p RSAParameters) constructor() okapi.KeyConstructor {
 
 func (p RSAParameters) configure(key *PKey) {
 	key.parameters = p
+	if p.isForEncryption() {
+		if key.public {
+			check1(C.EVP_PKEY_encrypt_init(key.ctx))
+		} else {
+			check1(C.EVP_PKEY_decrypt_init(key.ctx))
+		}
+	} else {
+		if key.public {
+			check1(C.EVP_PKEY_verify_init(key.ctx))
+		} else {
+			check1(C.EVP_PKEY_sign_init(key.ctx))
+		}
+	}
 	checkP(C.EVP_PKEY_CTX_ctrl(key.ctx, C.EVP_PKEY_RSA, -1, C.EVP_PKEY_CTRL_RSA_PADDING, p.padding, nil))
 	//checkP(C.EVP_PKEY_CTX_set_rsa_padding(key.ctx, p.padding))
 	if p.md != nil {
