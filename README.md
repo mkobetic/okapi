@@ -17,13 +17,12 @@ See tests subdirectory for usage examples, the test files are mostly go testing 
 Status
 ======
 
-* libcrypto implementation is under active development hashes, symmetric ciphers, and RSA encryption/signing should be mostly functional
+* libcrypto implementation is under active development hashes, symmetric ciphers, RSA (encryption/signing) and DSA should be mostly functional
 * mscng implementation has only a sketch of hash implementation currently, may not even compile yet
 
 TODO
 ====
 
- * libcrypto: DSA
  * libcrypto: DH
  * libcrypto: ECDH, ECDSA
  * libcrypto: add pkey generation support
@@ -34,3 +33,4 @@ TODO
  * mscng: catch up
  * gocrypto implementation
  * benchmarks
+ * more test coverage
