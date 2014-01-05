@@ -16,23 +16,54 @@ import (
 	"unsafe"
 )
 
-type PrivateKey struct {
-	pkey *C.EVP_PKEY
+type algorithmParameters interface {
+	configure(*PKey)
+	isForSigning() bool
+	isForEncryption() bool
+	isForKeyAgreement() bool
 }
 
-func (key *PrivateKey) Decrypt(encrypted []byte) (decrypted []byte, err error) {
-	return nil, nil
+type PKey struct {
+	pkey       *C.EVP_PKEY
+	ctx        *C.EVP_PKEY_CTX
+	parameters algorithmParameters
+	public     bool
 }
 
-func (key *PrivateKey) Sign(digest []byte) (signature []byte, err error) {
-	return nil, nil
+func (key *PKey) Decrypt(encrypted []byte) (decrypted []byte, err error) {
+	if key.public {
+		return nil, errors.New("Public key cannot decrypt!")
+	}
+	if key.parameters.isForEncryption() {
+		return nil, errors.New("Key is not for encryption!")
+	}
+	return nil, errors.New("TODO")
 }
 
-func (key *PrivateKey) Derive(pub okapi.PublicKey) (secret []byte, err error) {
-	return nil, nil
+func (key *PKey) Sign(digest []byte) (signature []byte, err error) {
+	if key.public {
+		return nil, errors.New("Public key cannot sign!")
+	}
+	if key.parameters.isForSigning() {
+		return nil, errors.New("Key is not for signing!")
+	}
+	return nil, errors.New("TODO")
 }
 
-func (key *PrivateKey) PublicKey() okapi.PublicKey {
+func (key *PKey) Derive(pub okapi.PublicKey) (secret []byte, err error) {
+	if key.public {
+		return nil, errors.New("Public key cannot derive!")
+	}
+	if key.parameters.isForKeyAgreement() {
+		return nil, errors.New("Key is not for key agreement!")
+	}
+	return nil, errors.New("TODO")
+}
+
+func (key *PKey) PublicKey() okapi.PublicKey {
+	if key.public {
+		return key
+	}
 	var buffer *C.uchar
 	blen := int(C.i2d_PublicKey(key.pkey, &buffer))
 	if blen < 0 {
@@ -42,63 +73,81 @@ func (key *PrivateKey) PublicKey() okapi.PublicKey {
 	if pkey == nil {
 		panic("PrivateKey to PublicKey conversion failed!")
 	}
-	return &PublicKey{pkey: pkey}
+	pub, err := newPKey(key.keyType(), pkey)
+	if err != nil {
+		panic(err.Error())
+	}
+	pub.public = true
+	pub.parameters = key.parameters
+	return pub
 }
 
-func (key *PrivateKey) Close() {}
+func (key *PKey) Encrypt(plain []byte) (encrypted []byte, err error) {
+	if key.parameters.isForEncryption() {
+		return nil, errors.New("Key is not for encryption!")
+	}
+	return nil, errors.New("TODO")
+}
 
-func (key *PrivateKey) KeySize() int {
+func (key *PKey) Verify(signature []byte, digest []byte) (valid bool, err error) {
+	if key.parameters.isForSigning() {
+		return false, errors.New("Key is not for signing!")
+	}
+	return false, errors.New("TODO")
+}
+
+func (key *PKey) Close() {
+	C.EVP_PKEY_CTX_free(key.ctx)
+	C.EVP_PKEY_free(key.pkey)
+}
+
+func (key *PKey) KeySize() int {
 	return int(C.EVP_PKEY_bits(key.pkey))
 }
 
-func NewPrivateKey(keyType C.int, parameters interface{}) (okapi.PrivateKey, error) {
+func (key *PKey) keyType() C.int {
+	return C.EVP_PKEY_id(key.pkey)
+}
+
+func newPKey(keyType C.int, parameters interface{}) (key *PKey, err error) {
 	switch parameters := parameters.(type) {
+	case *C.EVP_PKEY:
+		key = &PKey{pkey: parameters}
 	case int:
-		return NewPrivateKeySize(keyType, parameters)
+		key, err = newPKeySize(keyType, parameters)
 	case []*big.Int:
-		return NewPrivateKeyElements(keyType, parameters)
+		key, err = newPKeyElements(keyType, parameters)
 	case string:
-		return NewPrivateKeyPEM([]byte(parameters))
+		key, err = newPKeyPEM([]byte(parameters))
 	default:
-		return nil, errors.New("Invalid Parameters")
+		err = errors.New("Invalid Parameters")
 	}
+	if err != nil {
+		return
+	}
+	ctx := C.EVP_PKEY_CTX_new(key.pkey, nil)
+	if ctx == nil {
+		C.EVP_PKEY_free(key.pkey)
+		return nil, errors.New("Failed to create EVP_PKEY_CTX")
+	}
+	key.ctx = ctx
+	return key, nil
 }
 
-func NewPrivateKeySize(keyType C.int, size int) (okapi.PrivateKey, error) {
-	return nil, nil
+func newPKeySize(keyType C.int, size int) (*PKey, error) {
+	return nil, errors.New("TODO")
 }
 
-func NewPrivateKeyElements(keyType C.int, elements []*big.Int) (okapi.PrivateKey, error) {
-	return nil, nil
+func newPKeyElements(keyType C.int, elements []*big.Int) (*PKey, error) {
+	return nil, errors.New("TODO")
 }
 
-func NewPrivateKeyPEM(pem []byte) (okapi.PrivateKey, error) {
+func newPKeyPEM(pem []byte) (*PKey, error) {
 	bio := C.BIO_new_mem_buf(unsafe.Pointer(&pem[0]), C.int(len(pem)))
 	defer C.BIO_free(bio)
 	pkey := C.PEM_read_bio_PrivateKey(bio, nil, nil, nil)
 	if pkey == nil {
 		return nil, errors.New("Invalid PEM input")
 	}
-	return &PrivateKey{pkey: pkey}, nil
+	return &PKey{pkey: pkey}, nil
 }
-
-type PublicKey struct {
-	pkey *C.EVP_PKEY
-}
-
-func NewPublicKeyPEM(pem []byte) okapi.PublicKey {
-	bio := C.BIO_new_mem_buf(unsafe.Pointer(&pem[0]), C.int(len(pem)))
-	defer C.BIO_free(bio)
-	pkey := C.PEM_read_bio_PUBKEY(bio, nil, nil, nil)
-	return &PublicKey{pkey: pkey}
-}
-
-func (key *PublicKey) Encrypt(plain []byte) (encrypted []byte, err error) {
-	return nil, nil
-}
-
-func (key *PublicKey) Verify(signature []byte, digest []byte) (valid bool, err error) {
-	return false, nil
-}
-
-func (key *PublicKey) Close() {}

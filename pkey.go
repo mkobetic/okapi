@@ -12,9 +12,9 @@ type KeyConstructor func(parameters interface{}) (PrivateKey, error)
 // Predefined key constructors for known algorithms and purposes, implementations are provided by subpackages. Note that different implementations can support different set of algorithms/purposes. If given algorithm/purpose combination is not supported by the imported implementations, the value of the corresponding variable will be nil.
 var (
 	// encryption PKCS1 v1.5 & v2.0
-	RSA_15, RSA_OAEP,
+	RSA, RSA_OAEP,
 	// signing PKCS1 v1.5
-	RSA_15_MD5, RSA_15_SHA1, RSA_15_SHA224, RSA_15_SHA256, RSA_15_SHA384, RSA_15_SHA512,
+	RSA_MD5, RSA_SHA1, RSA_SHA224, RSA_SHA256, RSA_SHA384, RSA_SHA512,
 	// signing PKCS1 v2.0
 	RSA_PSS_MD5, RSA_PSS_SHA1, RSA_PSS_SHA224, RSA_PSS_SHA256, RSA_PSS_SHA384, RSA_PSS_SHA512,
 	// signing DSS

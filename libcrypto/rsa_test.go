@@ -7,13 +7,12 @@ import (
 )
 
 func TestReadPrivatePEM_RSA(t *testing.T) {
-	pri, err := RSA_15(pemRSA1024)
+	pri, err := newRSAKey(pemRSA1024, RSA)
 	if err != nil {
 		t.Fatal("Failed reading PEM")
 	}
 	defer pri.Close()
-	key := pri.(*PrivateKey)
-	if key.KeySize() != 1024 {
+	if pri.KeySize() != 1024 {
 		t.Fatal("Invalid key size!")
 	}
 	pub := pri.PublicKey()

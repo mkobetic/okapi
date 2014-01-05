@@ -42,7 +42,7 @@ func NewHash(algorithm *C.EVP_MD) okapi.Hash {
 	h := &Hash{md: algorithm}
 	h.ctx = new(C.EVP_MD_CTX)
 	C.EVP_MD_CTX_init(h.ctx)
-	check(C.EVP_DigestInit_ex(h.ctx, algorithm, nil))
+	check1(C.EVP_DigestInit_ex(h.ctx, algorithm, nil))
 	return h
 }
 
@@ -55,7 +55,7 @@ func (h *Hash) BlockSize() int {
 }
 
 func (h *Hash) Reset() {
-	check(C.EVP_DigestInit_ex(h.ctx, nil, nil))
+	check1(C.EVP_DigestInit_ex(h.ctx, nil, nil))
 }
 
 func (h *Hash) Clone() okapi.Hash {
@@ -70,7 +70,7 @@ func (h *Hash) Digest() []byte {
 		return h.digest
 	}
 	h.digest = make([]byte, h.Size())
-	check(C.EVP_DigestFinal_ex(h.ctx, (*C.uchar)(&h.digest[0]), nil))
+	check1(C.EVP_DigestFinal_ex(h.ctx, (*C.uchar)(&h.digest[0]), nil))
 	return h.digest
 }
 
@@ -78,7 +78,7 @@ func (h *Hash) Write(data []byte) (int, error) {
 	if h.digest != nil {
 		return 0, errors.New("Cannot write into finalized hash")
 	}
-	check(C.EVP_DigestUpdate(h.ctx, unsafe.Pointer(&data[0]), C.size_t(len(data))))
+	check1(C.EVP_DigestUpdate(h.ctx, unsafe.Pointer(&data[0]), C.size_t(len(data))))
 	return len(data), nil
 }
 

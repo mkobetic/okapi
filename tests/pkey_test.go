@@ -9,7 +9,7 @@ package tests
 // )
 
 // func ExampleRSA() {
-// 	pri := okapi.RSA_15(2048)
+// 	pri := okapi.RSA(2048)
 // 	pub := pri.PublicKey()
 // 	plain := []byte("Message in a bottle!")
 // 	encrypted := pub.Encrypt(plain)

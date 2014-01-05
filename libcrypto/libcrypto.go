@@ -15,8 +15,18 @@ func init() {
 	C.ERR_load_crypto_strings()
 }
 
-func check(err C.int) {
+func check1(err C.int) {
 	if int(err) == 1 {
+		return
+	}
+	code := C.ERR_get_error()
+	function := C.GoString(C.ERR_func_error_string(code))
+	reason := C.GoString(C.ERR_reason_error_string(code))
+	panic(fmt.Sprintf("libcrypto error %x:%s:%s", uint64(code), function, reason))
+}
+
+func checkP(err C.int) {
+	if int(err) > 0 {
 		return
 	}
 	code := C.ERR_get_error()

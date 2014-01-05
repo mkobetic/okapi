@@ -80,10 +80,10 @@ func NewCipher(algorithm *C.EVP_CIPHER, key, iv []byte, encrypt bool) okapi.Ciph
 	if encrypt {
 		enc = 1
 	}
-	check(C.EVP_CipherInit_ex(c.ctx, algorithm, nil, nil, nil, enc))
+	check1(C.EVP_CipherInit_ex(c.ctx, algorithm, nil, nil, nil, enc))
 	C.EVP_CIPHER_CTX_set_key_length(c.ctx, C.int(len(key)))
 	C.EVP_CIPHER_CTX_set_padding(c.ctx, 0) // No padding
-	check(C.EVP_CipherInit_ex(c.ctx, nil, nil, (*C.uchar)(&key[0]), ivp, -1))
+	check1(C.EVP_CipherInit_ex(c.ctx, nil, nil, (*C.uchar)(&key[0]), ivp, -1))
 	return c
 }
 
@@ -117,7 +117,7 @@ func (c *Cipher) Update(in, out []byte) (int, int) {
 	} else {
 		inl = C.int(len(in))
 	}
-	check(C.EVP_CipherUpdate(c.ctx, (*C.uchar)(&out[0]), &outl, (*C.uchar)(&in[0]), inl))
+	check1(C.EVP_CipherUpdate(c.ctx, (*C.uchar)(&out[0]), &outl, (*C.uchar)(&in[0]), inl))
 	c.buffered = c.buffered + int(inl) - int(outl)
 	if c.buffered >= c.blockSize {
 		panic("Unprocessed input exeeded block size!")
@@ -131,7 +131,7 @@ func (c *Cipher) Finish(out []byte) int {
 	if out != nil && len(out) != 0 {
 		output = (*C.uchar)(&out[0])
 	}
-	check(C.EVP_CipherFinal_ex(c.ctx, output, &outl))
+	check1(C.EVP_CipherFinal_ex(c.ctx, output, &outl))
 	return int(outl)
 }
 
