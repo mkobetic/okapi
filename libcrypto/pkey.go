@@ -59,7 +59,19 @@ func (key *PKey) Sign(digest []byte) (signature []byte, err error) {
 	if !key.parameters.isForSigning() {
 		return nil, errors.New("Key is not for configured signing!")
 	}
-	return nil, errors.New("TODO")
+	var outlen C.size_t
+	inlen := C.size_t(len(digest))
+	in := (*C.uchar)(&digest[0])
+	err = error1(C.EVP_PKEY_sign(key.ctx, nil, &outlen, in, inlen))
+	if err != nil {
+		return nil, err
+	}
+	signature = make([]byte, int(outlen))
+	err = error1(C.EVP_PKEY_sign(key.ctx, (*C.uchar)(&signature[0]), &outlen, in, inlen))
+	if err != nil {
+		return nil, err
+	}
+	return signature[:int(outlen)], nil
 }
 
 func (key *PKey) Derive(pub okapi.PublicKey) (secret []byte, err error) {
@@ -118,7 +130,11 @@ func (key *PKey) Verify(signature []byte, digest []byte) (valid bool, err error)
 	if !key.parameters.isForSigning() {
 		return false, errors.New("Key is not configured for signing!")
 	}
-	return false, errors.New("TODO")
+	result := C.EVP_PKEY_verify(key.ctx, (*C.uchar)(&signature[0]), C.size_t(len(signature)), (*C.uchar)(&digest[0]), C.size_t(len(digest)))
+	if int(result) < 0 {
+		return false, error1(result)
+	}
+	return result == 1, nil
 }
 
 func (key *PKey) Close() {

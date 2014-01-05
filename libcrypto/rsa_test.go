@@ -38,3 +38,22 @@ func TestRSA_OAEP(t *testing.T) {
 		t.Fatalf("Result mismatch\nPlain    : %x\nEncrypted: %x\nDecrypted: %x\n", plain, encrypted, decrypted)
 	}
 }
+
+func TestRSA_MD5(t *testing.T) {
+	pri, _ := newRSAKey(pemRSA1024, RSA_MD5)
+	defer pri.Close()
+	pub := pri.PublicKey().(*PKey)
+	defer pub.Close()
+	digest := []byte("0123456789ABCDEF")
+	signature, err := pri.Sign(digest)
+	if err != nil {
+		t.Fatalf("Signing failed: %s", err)
+	}
+	valid, err := pub.Verify(signature, digest)
+	if err != nil {
+		t.Fatalf("Verification failed: %s", err)
+	}
+	if !valid {
+		t.Fatalf("\nSignature Invalid\nDigest   : %x\nSignature: %x", digest, signature)
+	}
+}
