@@ -11,6 +11,7 @@ package libcrypto
 import "C"
 import (
 	"github.com/mkobetic/okapi"
+	"unsafe"
 )
 
 func init() {
@@ -59,11 +60,13 @@ func (p RSAParameters) constructor() okapi.KeyConstructor {
 }
 
 func (p RSAParameters) configure(key *PKey) {
-	// key.parameters = p
-	// checkP(C.EVP_PKEY_CTX_set_rsa_padding(key.ctx, p.padding))
-	// if md != nil {
-	// 	checkP(C.EVP_PKEY_CTX_set_signature_md(key.ctx, p.md))
-	// }
+	key.parameters = p
+	checkP(C.EVP_PKEY_CTX_ctrl(key.ctx, C.EVP_PKEY_RSA, -1, C.EVP_PKEY_CTRL_RSA_PADDING, p.padding, nil))
+	//checkP(C.EVP_PKEY_CTX_set_rsa_padding(key.ctx, p.padding))
+	if p.md != nil {
+		checkP(C.EVP_PKEY_CTX_ctrl(key.ctx, -1, C.EVP_PKEY_OP_TYPE_SIG, C.EVP_PKEY_CTRL_MD, 0, unsafe.Pointer(p.md)))
+		//checkP(C.EVP_PKEY_CTX_set_signature_md(key.ctx, p.md))
+	}
 }
 
 func (p RSAParameters) isForEncryption() bool   { return p.md == nil }
