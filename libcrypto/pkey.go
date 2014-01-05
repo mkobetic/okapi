@@ -74,14 +74,28 @@ func (key *PKey) Sign(digest []byte) (signature []byte, err error) {
 	return signature[:int(outlen)], nil
 }
 
-func (key *PKey) Derive(pub okapi.PublicKey) (secret []byte, err error) {
+func (key *PKey) Derive(peer okapi.PublicKey) (secret []byte, err error) {
 	if key.public {
 		return nil, errors.New("Public key cannot derive!")
 	}
 	if !key.parameters.isForKeyAgreement() {
 		return nil, errors.New("Key is not configured for key agreement!")
 	}
-	return nil, errors.New("TODO")
+	err = error1(C.EVP_PKEY_derive_set_peer(key.ctx, peer.(*PKey).pkey))
+	if err != nil {
+		return nil, err
+	}
+	var outlen C.size_t
+	err = error1(C.EVP_PKEY_derive(key.ctx, nil, &outlen))
+	if err != nil {
+		return nil, err
+	}
+	secret = make([]byte, int(outlen))
+	err = error1(C.EVP_PKEY_derive(key.ctx, (*C.uchar)(&secret[0]), &outlen))
+	if err != nil {
+		return nil, err
+	}
+	return secret[:int(outlen)], nil
 }
 
 func (key *PKey) PublicKey() okapi.PublicKey {
@@ -97,7 +111,15 @@ func (key *PKey) PublicKey() okapi.PublicKey {
 	if pkey == nil {
 		panic("PrivateKey to PublicKey conversion failed!")
 	}
-	pub, err := newPKey(key.keyType(), pkey)
+	var (
+		pub *PKey
+		err error
+	)
+	if key.parameters.isForKeyAgreement() {
+		pub = &PKey{pkey: pkey}
+	} else {
+		pub, err = newPKey(key.keyType(), pkey)
+	}
 	if err != nil {
 		panic(err.Error())
 	}
@@ -138,8 +160,15 @@ func (key *PKey) Verify(signature []byte, digest []byte) (valid bool, err error)
 }
 
 func (key *PKey) Close() {
-	C.EVP_PKEY_CTX_free(key.ctx)
+	if key.pkey == nil {
+		return
+	}
+	if key.ctx != nil {
+		C.EVP_PKEY_CTX_free(key.ctx)
+		key.ctx = nil
+	}
 	C.EVP_PKEY_free(key.pkey)
+	key.pkey = nil
 }
 
 func (key *PKey) KeySize() int {
