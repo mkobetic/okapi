@@ -57,6 +57,10 @@ func (p dsaParameters) isForEncryption() bool   { return false }
 func (p dsaParameters) isForSigning() bool      { return true }
 func (p dsaParameters) isForKeyAgreement() bool { return false }
 
+func (p dsaParameters) toPublic(pri *PKey) (pub *PKey, err error) {
+	return newPKeyFromPrivate(pri)
+}
+
 func (p dsaParameters) generate(size int) (*PKey, error) {
 	pkey, err := newDSAParams(size)
 	if err != nil {

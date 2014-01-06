@@ -89,6 +89,10 @@ func (p rsaParameters) isForEncryption() bool   { return p.md == nil }
 func (p rsaParameters) isForSigning() bool      { return p.md != nil }
 func (p rsaParameters) isForKeyAgreement() bool { return false }
 
+func (p rsaParameters) toPublic(pri *PKey) (pub *PKey, err error) {
+	return newPKeyFromPrivate(pri)
+}
+
 func (p rsaParameters) generate(size int) (*PKey, error) {
 	ctx := C.EVP_PKEY_CTX_new_id(C.EVP_PKEY_RSA, nil)
 	if ctx == nil {

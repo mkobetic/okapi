@@ -18,6 +18,7 @@ import (
 type algorithmParameters interface {
 	configure(key *PKey)
 	generate(size int) (key *PKey, err error)
+	toPublic(pri *PKey) (pub *PKey, err error)
 	isForSigning() bool
 	isForEncryption() bool
 	isForKeyAgreement() bool
@@ -102,25 +103,10 @@ func (key *PKey) PublicKey() okapi.PublicKey {
 	if key.public {
 		return key
 	}
-	var buffer *C.uchar
-	blen := int(C.i2d_PublicKey(key.pkey, &buffer))
-	if blen < 0 {
-		panic("Key conversion failed (i2d)")
+	pub, err := key.parameters.toPublic(key)
+	if err != nil {
+		panic(err.Error())
 	}
-	pkey := C.d2i_PublicKey(C.EVP_PKEY_id(key.pkey), nil, &buffer, C.long(blen))
-	if pkey == nil {
-		panic("PrivateKey to PublicKey conversion failed!")
-	}
-	pub := &PKey{pkey: pkey, public: true, parameters: key.parameters}
-	if !key.parameters.isForKeyAgreement() {
-		ctx := C.EVP_PKEY_CTX_new(pkey, nil)
-		if ctx == nil {
-			C.EVP_PKEY_free(pkey)
-			panic("Failed to create EVP_PKEY_CTX")
-		}
-		pub.ctx = ctx
-	}
-	key.parameters.configure(pub)
 	return pub
 }
 
@@ -219,4 +205,25 @@ func newPKeyParams(params *C.EVP_PKEY) (*PKey, error) {
 		return nil, err
 	}
 	return &PKey{pkey: pkey}, nil
+}
+
+func newPKeyFromPrivate(pri *PKey) (*PKey, error) {
+	var buffer *C.uchar
+	blen := int(C.i2d_PublicKey(pri.pkey, &buffer))
+	if blen < 0 {
+		return nil, errors.New("Key conversion failed (i2d)")
+	}
+	pkey := C.d2i_PublicKey(C.EVP_PKEY_id(pri.pkey), nil, &buffer, C.long(blen))
+	if pkey == nil {
+		return nil, errors.New("PrivateKey to PublicKey conversion failed!")
+	}
+	pub := &PKey{pkey: pkey, public: true, parameters: pri.parameters}
+	ctx := C.EVP_PKEY_CTX_new(pkey, nil)
+	if ctx == nil {
+		C.EVP_PKEY_free(pkey)
+		return nil, errors.New("Failed to create EVP_PKEY_CTX")
+	}
+	pub.ctx = ctx
+	pri.parameters.configure(pub)
+	return pub, nil
 }

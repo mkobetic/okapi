@@ -42,6 +42,10 @@ func (p dhParameters) isForEncryption() bool   { return false }
 func (p dhParameters) isForSigning() bool      { return false }
 func (p dhParameters) isForKeyAgreement() bool { return true }
 
+func (p dhParameters) toPublic(pri *PKey) (pub *PKey, err error) {
+	return nil, errors.New("TODO")
+}
+
 func (p dhParameters) generate(size int) (*PKey, error) {
 	pkey, err := newDHParams(size)
 	if err != nil {
