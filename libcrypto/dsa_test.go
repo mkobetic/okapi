@@ -7,7 +7,7 @@ import (
 )
 
 func TestReadPrivatePEM_DSA(t *testing.T) {
-	pri, err := newDSAKey(pemDSA1024, DSA_SHA1)
+	pri, err := newPKey(pemDSA1024, DSA_SHA1)
 	if err != nil {
 		t.Fatal("Failed reading PEM")
 	}
@@ -20,7 +20,7 @@ func TestReadPrivatePEM_DSA(t *testing.T) {
 }
 
 func TestDSA_SHA1(t *testing.T) {
-	pri, _ := newDSAKey(pemDSA1024, DSA_SHA1)
+	pri, _ := newPKey(pemDSA1024, DSA_SHA1)
 	defer pri.Close()
 	pub := pri.PublicKey().(*PKey)
 	defer pub.Close()

@@ -8,7 +8,7 @@ import (
 )
 
 func TestReadPrivatePEM_DH(t *testing.T) {
-	pri, err := newDHKey(pemDH1024Params, DH)
+	pri, err := newPKey(pemDH1024Params, DH)
 	if err != nil {
 		t.Fatalf("Failed reading PEM: %s", err)
 	}
@@ -21,14 +21,14 @@ func TestReadPrivatePEM_DH(t *testing.T) {
 }
 
 func TestDH(t *testing.T) {
-	pri1, err := newDHKey(pemDH1024Params, DH)
+	pri1, err := newPKey(pemDH1024Params, DH)
 	if err != nil {
 		t.Fatalf("Failed reading PEM: %s", err)
 	}
 	defer pri1.Close()
 	pub1 := pri1.PublicKey()
 	defer pub1.Close()
-	pri2, _ := newDHKey(pemDH1024Params, DH)
+	pri2, _ := newPKey(pemDH1024Params, DH)
 	defer pri2.Close()
 	pub2 := pri2.PublicKey()
 	defer pub2.Close()

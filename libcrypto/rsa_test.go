@@ -8,7 +8,7 @@ import (
 )
 
 func TestReadPrivatePEM_RSA(t *testing.T) {
-	pri, err := newRSAKey(pemRSA1024, RSA)
+	pri, err := newPKey(pemRSA1024, RSA)
 	if err != nil {
 		t.Fatal("Failed reading PEM")
 	}
@@ -21,7 +21,7 @@ func TestReadPrivatePEM_RSA(t *testing.T) {
 }
 
 func TestRSA_OAEP(t *testing.T) {
-	pri, _ := newRSAKey(pemRSA1024, RSA_OAEP)
+	pri, _ := newPKey(pemRSA1024, RSA_OAEP)
 	defer pri.Close()
 	pub := pri.PublicKey().(*PKey)
 	defer pub.Close()
@@ -40,7 +40,7 @@ func TestRSA_OAEP(t *testing.T) {
 }
 
 func TestRSA_MD5(t *testing.T) {
-	pri, _ := newRSAKey(pemRSA1024, RSA_MD5)
+	pri, _ := newPKey(pemRSA1024, RSA_MD5)
 	defer pri.Close()
 	pub := pri.PublicKey().(*PKey)
 	defer pub.Close()

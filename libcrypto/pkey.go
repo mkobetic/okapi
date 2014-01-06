@@ -12,12 +12,12 @@ import "C"
 import (
 	"errors"
 	"github.com/mkobetic/okapi"
-	"math/big"
 	"unsafe"
 )
 
 type algorithmParameters interface {
-	configure(*PKey)
+	configure(key *PKey)
+	generate(size int) (key *PKey, err error)
 	isForSigning() bool
 	isForEncryption() bool
 	isForKeyAgreement() bool
@@ -111,21 +111,16 @@ func (key *PKey) PublicKey() okapi.PublicKey {
 	if pkey == nil {
 		panic("PrivateKey to PublicKey conversion failed!")
 	}
-	var (
-		pub *PKey
-		err error
-	)
-	if key.parameters.isForKeyAgreement() {
-		pub = &PKey{pkey: pkey}
-	} else {
-		pub, err = newPKey(key.keyType(), pkey)
+	pub := &PKey{pkey: pkey, public: true, parameters: key.parameters}
+	if !key.parameters.isForKeyAgreement() {
+		ctx := C.EVP_PKEY_CTX_new(pkey, nil)
+		if ctx == nil {
+			C.EVP_PKEY_free(pkey)
+			panic("Failed to create EVP_PKEY_CTX")
+		}
+		pub.ctx = ctx
 	}
-	if err != nil {
-		panic(err.Error())
-	}
-	pub.public = true
-	pub.parameters = key.parameters
-	pub.parameters.configure(pub)
+	key.parameters.configure(pub)
 	return pub
 }
 
@@ -175,20 +170,14 @@ func (key *PKey) KeySize() int {
 	return int(C.EVP_PKEY_bits(key.pkey))
 }
 
-func (key *PKey) keyType() C.int {
-	return C.EVP_PKEY_id(key.pkey)
-}
-
-func newPKey(keyType C.int, parameters interface{}) (key *PKey, err error) {
-	switch parameters := parameters.(type) {
-	case *C.EVP_PKEY:
-		key = &PKey{pkey: parameters}
+func newPKey(kps interface{}, aps algorithmParameters) (key *PKey, err error) {
+	switch kps := kps.(type) {
 	case int:
-		key, err = newPKeySize(keyType, parameters)
-	case []*big.Int:
-		key, err = newPKeyElements(keyType, parameters)
+		key, err = aps.generate(kps)
+	// case []*big.Int:
+	// 	key, err = newRSAKeyElements(keyType, parameters)
 	case string:
-		key, err = newPKeyPEM([]byte(parameters))
+		key, err = newPKeyPEM([]byte(kps))
 	default:
 		err = errors.New("Invalid Parameters")
 	}
@@ -201,15 +190,8 @@ func newPKey(keyType C.int, parameters interface{}) (key *PKey, err error) {
 		return nil, errors.New("Failed to create EVP_PKEY_CTX")
 	}
 	key.ctx = ctx
-	return key, nil
-}
-
-func newPKeySize(keyType C.int, size int) (*PKey, error) {
-	return nil, errors.New("TODO")
-}
-
-func newPKeyElements(keyType C.int, elements []*big.Int) (*PKey, error) {
-	return nil, errors.New("TODO")
+	aps.configure(key)
+	return
 }
 
 func newPKeyPEM(pem []byte) (*PKey, error) {
@@ -218,6 +200,23 @@ func newPKeyPEM(pem []byte) (*PKey, error) {
 	pkey := C.PEM_read_bio_PrivateKey(bio, nil, nil, nil)
 	if pkey == nil {
 		return nil, errors.New("Invalid PEM input")
+	}
+	return &PKey{pkey: pkey}, nil
+}
+
+func newPKeyParams(params *C.EVP_PKEY) (*PKey, error) {
+	ctx := C.EVP_PKEY_CTX_new(params, nil)
+	if ctx == nil {
+		return nil, errors.New("Failed EVP_PKEY_CTX_new_id")
+	}
+	err := error1(C.EVP_PKEY_keygen_init(ctx))
+	if err != nil {
+		return nil, err
+	}
+	var pkey *C.EVP_PKEY
+	err = error1(C.EVP_PKEY_keygen(ctx, &pkey))
+	if err != nil {
+		return nil, err
 	}
 	return &PKey{pkey: pkey}, nil
 }

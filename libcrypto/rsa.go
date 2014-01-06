@@ -10,6 +10,7 @@ package libcrypto
 */
 import "C"
 import (
+	"errors"
 	"github.com/mkobetic/okapi"
 	"unsafe"
 )
@@ -55,7 +56,7 @@ var (
 
 func (p rsaParameters) constructor() okapi.KeyConstructor {
 	return func(keyParameters interface{}) (okapi.PrivateKey, error) {
-		return newRSAKey(keyParameters, p)
+		return newPKey(keyParameters, p)
 	}
 }
 
@@ -88,11 +89,26 @@ func (p rsaParameters) isForEncryption() bool   { return p.md == nil }
 func (p rsaParameters) isForSigning() bool      { return p.md != nil }
 func (p rsaParameters) isForKeyAgreement() bool { return false }
 
-func newRSAKey(kps interface{}, rsaps rsaParameters) (*PKey, error) {
-	key, err := newPKey(C.EVP_PKEY_RSA, kps)
-	if err != nil {
-		return key, err
+func (p rsaParameters) generate(size int) (*PKey, error) {
+	ctx := C.EVP_PKEY_CTX_new_id(C.EVP_PKEY_RSA, nil)
+	if ctx == nil {
+		return nil, errors.New("Failed EVP_PKEY_CTX_new_id")
 	}
-	rsaps.configure(key)
-	return key, nil
+	err := error1(C.EVP_PKEY_keygen_init(ctx))
+	if err != nil {
+		return nil, err
+	}
+	// Following macro didn't work
+	// err = error1(C.EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, size))
+	err = error1(C.EVP_PKEY_CTX_ctrl(ctx, C.EVP_PKEY_RSA, C.EVP_PKEY_OP_KEYGEN, C.EVP_PKEY_CTRL_RSA_KEYGEN_BITS, C.int(size), nil))
+
+	if err != nil {
+		return nil, err
+	}
+	var pkey *C.EVP_PKEY
+	err = error1(C.EVP_PKEY_keygen(ctx, &pkey))
+	if err != nil {
+		return nil, err
+	}
+	return &PKey{pkey: pkey}, nil
 }
