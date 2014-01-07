@@ -7,16 +7,14 @@ import (
 )
 
 func TestGenerateKey_DH(t *testing.T) {
-	pri, err := newPKey(1024, DH)
+	pri, err := newPKey(512, DH)
 	if err != nil {
 		t.Fatalf("Failed generating key: %s", err)
 	}
 	defer pri.Close()
-	if pri.KeySize() != 1024 {
+	if pri.KeySize() != 512 {
 		t.Fatal("Invalid key size!")
 	}
-	// pub := pri.PublicKey()
-	// defer pub.Close()
 }
 
 // func TestDH(t *testing.T) {

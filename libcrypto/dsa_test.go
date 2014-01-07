@@ -6,6 +6,17 @@ import (
 	"testing"
 )
 
+func TestGenerateKey_DSA(t *testing.T) {
+	pri, err := newPKey(512, DSA_SHA1)
+	if err != nil {
+		t.Fatalf("Failed generating key: %s", err)
+	}
+	defer pri.Close()
+	if pri.KeySize() != 512 {
+		t.Fatal("Invalid key size!")
+	}
+}
+
 func TestReadPrivatePEM_DSA(t *testing.T) {
 	pri, err := newPKey(pemDSA1024, DSA_SHA1)
 	if err != nil {

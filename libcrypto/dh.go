@@ -65,7 +65,7 @@ func newDHParams(size int) (*C.EVP_PKEY, error) {
 	}
 	// Following macro didn't work:
 	// err = error1(C.EVP_PKEY_CTX_set_dh_paramgen_prime_len(ctx, size))
-	// err = error1(C.EVP_PKEY_CTX_ctrl(ctx, C.EVP_PKEY_DH, C.EVP_PKEY_OP_PARAMGEN, C.EVP_PKEY_CTRL_DH_PARAMGEN_PRIME_LEN, C.int(size), nil))
+	err = error1(C.EVP_PKEY_CTX_ctrl(ctx, C.EVP_PKEY_DH, C.EVP_PKEY_OP_PARAMGEN, C.EVP_PKEY_CTRL_DH_PARAMGEN_PRIME_LEN, C.int(size), nil))
 
 	// if err != nil {
 	// 	return nil, err

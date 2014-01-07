@@ -7,6 +7,17 @@ import (
 	"testing"
 )
 
+func TestGenerateKey_RSA(t *testing.T) {
+	pri, err := newPKey(512, RSA)
+	if err != nil {
+		t.Fatalf("Failed generating key: %s", err)
+	}
+	defer pri.Close()
+	if pri.KeySize() != 512 {
+		t.Fatal("Invalid key size!")
+	}
+}
+
 func TestReadPrivatePEM_RSA(t *testing.T) {
 	pri, err := newPKey(pemRSA1024, RSA)
 	if err != nil {

@@ -80,7 +80,7 @@ func newDSAParams(size int) (*C.EVP_PKEY, error) {
 	}
 	// Following macro didn't work
 	// err = error1(C.EVP_PKEY_CTX_set_dsa_paramgen_bits(ctx, size))
-	// err = error1(C.EVP_PKEY_CTX_ctrl(ctx, C.EVP_PKEY_DSA, C.EVP_PKEY_OP_PARAMGEN, C.EVP_PKEY_CTRL_DSA_PARAMGEN_BITS, C.int(size), nil))
+	err = error1(C.EVP_PKEY_CTX_ctrl(ctx, C.EVP_PKEY_DSA, C.EVP_PKEY_OP_PARAMGEN, C.EVP_PKEY_CTRL_DSA_PARAMGEN_BITS, C.int(size), nil))
 
 	if err != nil {
 		return nil, err
