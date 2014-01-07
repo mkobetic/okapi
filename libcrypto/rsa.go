@@ -2,12 +2,8 @@
 
 package libcrypto
 
-/*
-#cgo LDFLAGS:  -L/usr/local/opt/openssl/lib -lcrypto
-#cgo CFLAGS: -I/usr/local/opt/openssl/include
-#include <openssl/evp.h>
-#include <openssl/rsa.h>
-*/
+// #include <openssl/evp.h>
+// #include <openssl/rsa.h>
 import "C"
 import (
 	"errors"
