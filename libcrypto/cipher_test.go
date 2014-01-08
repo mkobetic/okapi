@@ -9,7 +9,7 @@ import (
 
 func TestRC4(t *testing.T) {
 	key := []byte("open sesame")
-	rc4 := RC4(key, nil, true)
+	rc4 := NewCipher(RC4, key, nil, true)
 	defer rc4.Close()
 	if rc4.BlockSize() != 1 {
 		t.Fatal("Invalid block size")
@@ -27,7 +27,7 @@ func TestRC4(t *testing.T) {
 	if outs != 0 {
 		t.Fatalf("Wrong encryption finish count: %d", outs)
 	}
-	rc4 = RC4(key, nil, false)
+	rc4 = NewCipher(RC4, key, nil, false)
 	defer rc4.Close()
 	decrypted := make([]byte, len(plain))
 	ins, outs = rc4.Update(encrypted, decrypted)
@@ -44,7 +44,7 @@ func TestRC4(t *testing.T) {
 }
 
 func TestBlockWrites(t *testing.T) {
-	bf := BF_CBC([]byte("open sesame!"), []byte("12345678"), true).(*Cipher)
+	bf := NewCipher(BF_CBC, []byte("open sesame!"), []byte("12345678"), true).(*Cipher)
 	defer bf.Close()
 	plain := []byte("0123456789abcdefghijklmnopqrstuvxyz")
 	encrypted := make([]byte, 30)
@@ -69,7 +69,7 @@ func TestBlockWrites(t *testing.T) {
 func TestAES_CBC(t *testing.T) {
 	key := []byte("0123456789ABCDEF")
 	iv := []byte("0123456789ABCDEF")
-	aes := AES_CBC(key, iv, true)
+	aes := NewCipher(AES_CBC, key, iv, true)
 	defer aes.Close()
 	if aes.BlockSize() != 16 {
 		t.Fatal("Wrong block Size")
@@ -92,7 +92,7 @@ func TestAES_CBC(t *testing.T) {
 	if outs != 0 {
 		t.Fatalf("Wrong encryption finish count: %d", outs)
 	}
-	aes = AES_CBC(key, iv, false)
+	aes = NewCipher(AES_CBC, key, iv, false)
 	defer aes.Close()
 	outs = 0
 	ins = 0
@@ -120,7 +120,7 @@ func TestAES_CTR(t *testing.T) {
 	key := make([]byte, 32)
 	// In CTR mode the IV is the counter
 	iv := make([]byte, 16) // all zeros
-	aes := AES_CTR(key, iv, true)
+	aes := NewCipher(AES_CTR, key, iv, true)
 	defer aes.Close()
 	plain := make([]byte, 155) // intentionally not a multiple of block length
 	for i := 0; i < len(plain); i += 1 {
@@ -137,7 +137,7 @@ func TestAES_CTR(t *testing.T) {
 	}
 	// let's decrypt from 9th block on
 	iv[15] = 8
-	aes = AES_CTR(key, iv, false)
+	aes = NewCipher(AES_CTR, key, iv, false)
 	defer aes.Close()
 	decrypted := make([]byte, len(plain)-(8*16))
 	ins, outs = aes.Update(encrypted[8*16:], decrypted)
@@ -154,7 +154,7 @@ func TestAES_GCM(t *testing.T) {
 	key := make([]byte, 16)
 	// In GCM mode the IV is the counter
 	iv := make([]byte, 16) // all zeros
-	aes := AES_GCM(key, iv, true).(*Cipher)
+	aes := NewCipher(AES_GCM, key, iv, true).(*Cipher)
 	defer aes.Close()
 	plain := make([]byte, 155) // intentionally not a multiple of block length
 	for i := 0; i < len(plain); i += 1 {
@@ -171,7 +171,7 @@ func TestAES_GCM(t *testing.T) {
 	}
 	tag := make([]byte, 16)
 	aes.GCMGetTag(tag)
-	aes = AES_GCM(key, iv, false).(*Cipher)
+	aes = NewCipher(AES_GCM, key, iv, false).(*Cipher)
 	defer aes.Close()
 	aes.GCMSetTag(tag)
 	decrypted := make([]byte, len(plain))
