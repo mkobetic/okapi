@@ -90,7 +90,7 @@ type Cipher struct {
 	blockSize int           // caches the cipher block size
 }
 
-func NewCipher(params cipherParams, key, iv []byte, encrypt bool) okapi.Cipher {
+func NewCipher(params cipherParams, key, iv []byte, encrypt bool) *Cipher {
 	algorithm := params.algorithm(len(key))
 	c := &Cipher{cipher: algorithm}
 	c.blockSize = int(C.EVP_CIPHER_block_size(algorithm))

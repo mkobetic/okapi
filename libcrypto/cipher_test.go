@@ -44,7 +44,7 @@ func TestRC4(t *testing.T) {
 }
 
 func TestBlockWrites(t *testing.T) {
-	bf := NewCipher(BF_CBC, []byte("open sesame!"), []byte("12345678"), true).(*Cipher)
+	bf := NewCipher(BF_CBC, []byte("open sesame!"), []byte("12345678"), true)
 	defer bf.Close()
 	plain := []byte("0123456789abcdefghijklmnopqrstuvxyz")
 	encrypted := make([]byte, 30)
@@ -154,7 +154,7 @@ func TestAES_GCM(t *testing.T) {
 	key := make([]byte, 16)
 	// In GCM mode the IV is the counter
 	iv := make([]byte, 16) // all zeros
-	aes := NewCipher(AES_GCM, key, iv, true).(*Cipher)
+	aes := NewCipher(AES_GCM, key, iv, true)
 	defer aes.Close()
 	plain := make([]byte, 155) // intentionally not a multiple of block length
 	for i := 0; i < len(plain); i += 1 {
@@ -171,7 +171,7 @@ func TestAES_GCM(t *testing.T) {
 	}
 	tag := make([]byte, 16)
 	aes.GCMGetTag(tag)
-	aes = NewCipher(AES_GCM, key, iv, false).(*Cipher)
+	aes = NewCipher(AES_GCM, key, iv, false)
 	defer aes.Close()
 	aes.GCMSetTag(tag)
 	decrypted := make([]byte, len(plain))
