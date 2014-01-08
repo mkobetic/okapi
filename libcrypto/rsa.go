@@ -52,7 +52,7 @@ var (
 
 func (p rsaParameters) constructor() okapi.KeyConstructor {
 	return func(keyParameters interface{}) (okapi.PrivateKey, error) {
-		return newPKey(keyParameters, p)
+		return NewPKey(keyParameters, p)
 	}
 }
 

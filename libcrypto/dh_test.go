@@ -7,7 +7,7 @@ import (
 )
 
 func TestGenerateKey_DH(t *testing.T) {
-	pri, err := newPKey(512, DH)
+	pri, err := NewPKey(512, DH)
 	if err != nil {
 		t.Fatalf("Failed generating key: %s", err)
 	}
@@ -18,14 +18,14 @@ func TestGenerateKey_DH(t *testing.T) {
 }
 
 // func TestDH(t *testing.T) {
-// 	pri1, err := newPKey(1024, DH)
+// 	pri1, err := NewPKey(1024, DH)
 // 	if err != nil {
 // 		t.Fatalf("Failed generating key: %s", err)
 // 	}
 // 	defer pri1.Close()
 // 	pub1 := pri1.PublicKey()
 // 	defer pub1.Close()
-// 	pri2, _ := newPKey(pemDH1024Params, DH)
+// 	pri2, _ := NewPKey(pemDH1024Params, DH)
 // 	defer pri2.Close()
 // 	pub2 := pri2.PublicKey()
 // 	defer pub2.Close()

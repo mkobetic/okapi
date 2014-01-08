@@ -152,7 +152,7 @@ func (key *PKey) KeySize() int {
 	return int(C.EVP_PKEY_bits(key.pkey))
 }
 
-func newPKey(kps interface{}, aps algorithmParameters) (key *PKey, err error) {
+func NewPKey(kps interface{}, aps algorithmParameters) (key *PKey, err error) {
 	switch kps := kps.(type) {
 	case int:
 		key, err = aps.generate(kps)

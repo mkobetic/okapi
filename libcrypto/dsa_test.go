@@ -7,7 +7,7 @@ import (
 )
 
 func TestGenerateKey_DSA(t *testing.T) {
-	pri, err := newPKey(512, DSA_SHA1)
+	pri, err := NewPKey(512, DSA_SHA1)
 	if err != nil {
 		t.Fatalf("Failed generating key: %s", err)
 	}
@@ -18,7 +18,7 @@ func TestGenerateKey_DSA(t *testing.T) {
 }
 
 func TestReadPrivatePEM_DSA(t *testing.T) {
-	pri, err := newPKey(pemDSA1024, DSA_SHA1)
+	pri, err := NewPKey(pemDSA1024, DSA_SHA1)
 	if err != nil {
 		t.Fatal("Failed reading PEM")
 	}
@@ -31,7 +31,7 @@ func TestReadPrivatePEM_DSA(t *testing.T) {
 }
 
 func TestDSA_SHA1(t *testing.T) {
-	pri, _ := newPKey(pemDSA1024, DSA_SHA1)
+	pri, _ := NewPKey(pemDSA1024, DSA_SHA1)
 	defer pri.Close()
 	pub := pri.PublicKey().(*PKey)
 	defer pub.Close()

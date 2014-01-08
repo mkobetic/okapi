@@ -26,6 +26,7 @@ TODO
  * libcrypto: ECDH, ECDSA
  * libcrypto: add PKCS8 import/export for PrivateKey
  * libcrypto: add X.509 import/export for PublicKey
+ * libcrypto: portable signature import/export
  * libcrypto: add HMAC support to hashes
  * libcrypto: add random support
  * mscng: catch up
