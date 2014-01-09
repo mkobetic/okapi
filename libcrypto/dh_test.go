@@ -18,6 +18,17 @@ func TestGenerateKey_DH(t *testing.T) {
 	}
 }
 
+func TestGenerateKey_ECDH(t *testing.T) {
+	pri, err := NewPKey(521, ECDH)
+	if err != nil {
+		t.Fatalf("Failed generating key: %s", err)
+	}
+	defer pri.Close()
+	if pri.KeySize() != 521 {
+		t.Fatal("Invalid key size!")
+	}
+}
+
 func TestDH(t *testing.T) {
 	pri1, err := NewPKey(512, DH)
 	if err != nil {
