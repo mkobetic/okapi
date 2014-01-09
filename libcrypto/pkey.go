@@ -159,7 +159,9 @@ func NewPKey(kps interface{}, aps algorithmParameters) (key *PKey, err error) {
 	// case []*big.Int:
 	// 	key, err = newRSAKeyElements(keyType, parameters)
 	case string:
-		key, err = newPKeyPEM([]byte(kps))
+		key, err = newPKeyFromPEM([]byte(kps))
+	case *C.EVP_PKEY:
+		key, err = newPKeyFromParams(kps)
 	default:
 		err = errors.New("Invalid Parameters")
 	}
@@ -176,7 +178,7 @@ func NewPKey(kps interface{}, aps algorithmParameters) (key *PKey, err error) {
 	return
 }
 
-func newPKeyPEM(pem []byte) (*PKey, error) {
+func newPKeyFromPEM(pem []byte) (*PKey, error) {
 	bio := C.BIO_new_mem_buf(unsafe.Pointer(&pem[0]), C.int(len(pem)))
 	defer C.BIO_free(bio)
 	pkey := C.PEM_read_bio_PrivateKey(bio, nil, nil, nil)
@@ -186,7 +188,7 @@ func newPKeyPEM(pem []byte) (*PKey, error) {
 	return &PKey{pkey: pkey}, nil
 }
 
-func newPKeyParams(params *C.EVP_PKEY) (*PKey, error) {
+func newPKeyFromParams(params *C.EVP_PKEY) (*PKey, error) {
 	ctx := C.EVP_PKEY_CTX_new(params, nil)
 	if ctx == nil {
 		return nil, errors.New("Failed EVP_PKEY_CTX_new_id")

@@ -62,7 +62,7 @@ func (p dsaParameters) generate(size int) (*PKey, error) {
 	if err != nil {
 		return nil, err
 	}
-	return newPKeyParams(pkey)
+	return newPKeyFromParams(pkey)
 }
 
 func newDSAParams(size int) (*C.EVP_PKEY, error) {
