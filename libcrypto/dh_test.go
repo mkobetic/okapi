@@ -26,7 +26,7 @@ func TestDH(t *testing.T) {
 	defer pri1.Close()
 	pub1 := pri1.PublicKey()
 	defer pub1.Close()
-	pri2, _ := NewPKey(pri1.pkey, DH)
+	pri2, _ := NewPKey(pub1, DH)
 	defer pri2.Close()
 	pub2 := pri2.PublicKey()
 	defer pub2.Close()

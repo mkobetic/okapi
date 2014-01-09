@@ -160,8 +160,8 @@ func NewPKey(kps interface{}, aps algorithmParameters) (key *PKey, err error) {
 	// 	key, err = newRSAKeyElements(keyType, parameters)
 	case string:
 		key, err = newPKeyFromPEM([]byte(kps))
-	case *C.EVP_PKEY:
-		key, err = newPKeyFromParams(kps)
+	case *PKey:
+		key, err = newPKeyFromParams(kps.pkey)
 	default:
 		err = errors.New("Invalid Parameters")
 	}
