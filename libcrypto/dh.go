@@ -75,7 +75,7 @@ func (p dhParameters) toPublic(pri *PKey) (pub *PKey, err error) {
 	ctx := C.EVP_PKEY_CTX_new(pkey, nil)
 	if ctx == nil {
 		C.EVP_PKEY_free(pkey)
-		return nil, errors.New("Failed to create EVP_PKEY_CTX")
+		return nil, errors.New(libcryptoError())
 	}
 	pub.ctx = ctx
 	pri.parameters.configure(pub)
@@ -103,6 +103,7 @@ func newDHParams(size int, keyType C.int) (*C.EVP_PKEY, error) {
 	if ctx == nil {
 		return nil, errors.New("Failed EVP_PKEY_CTX_new_id")
 	}
+	defer C.EVP_PKEY_CTX_free(ctx)
 	err := error1(C.EVP_PKEY_paramgen_init(ctx))
 	if err != nil {
 		return nil, err

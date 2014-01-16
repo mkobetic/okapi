@@ -94,6 +94,7 @@ func (p rsaParameters) generate(size int) (*PKey, error) {
 	if ctx == nil {
 		return nil, errors.New("Failed EVP_PKEY_CTX_new_id")
 	}
+	defer C.EVP_PKEY_CTX_free(ctx)
 	err := error1(C.EVP_PKEY_keygen_init(ctx))
 	if err != nil {
 		return nil, err
