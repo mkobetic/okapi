@@ -22,9 +22,9 @@ type dhParameters struct {
 }
 
 var (
-	DH         = dhParameters{ecc: false}
-	ECDH       = dhParameters{ecc: true}
-	size2curve = map[int]C.int{224: C.NID_secp224r1, 384: C.NID_secp384r1, 521: C.NID_secp521r1}
+	DH   = dhParameters{ecc: false}
+	ECDH = dhParameters{ecc: true}
+	// size2curve = map[int]C.int{224: C.NID_secp224r1, 384: C.NID_secp384r1, 521: C.NID_secp521r1}
 )
 
 func (p dhParameters) constructor() okapi.KeyConstructor {
