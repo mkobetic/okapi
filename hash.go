@@ -30,3 +30,10 @@ var (
 	SHA224, SHA256, SHA384, SHA512,
 	RIPEMD160 HashConstructor
 )
+
+// MAC is a keyed Hash
+type MACConstructor func(hash HashConstructor, key []byte) Hash
+
+var (
+	HMAC MACConstructor
+)
