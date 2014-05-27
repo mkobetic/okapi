@@ -11,50 +11,43 @@ import (
 )
 
 func init() {
-	okapi.MD4 = MD4.constructor()
-	okapi.MD5 = MD5.constructor()
-	okapi.SHA1 = SHA1.constructor()
-	okapi.SHA224 = SHA224.constructor()
-	okapi.SHA256 = SHA256.constructor()
-	okapi.SHA384 = SHA384.constructor()
-	okapi.SHA512 = SHA512.constructor()
-	okapi.RIPEMD160 = RIPEMD160.constructor()
+	okapi.MD4 = MD4
+	okapi.MD5 = MD5
+	okapi.SHA1 = SHA1
+	okapi.SHA224 = SHA224
+	okapi.SHA256 = SHA256
+	okapi.SHA384 = SHA384
+	okapi.SHA512 = SHA512
+	okapi.RIPEMD160 = RIPEMD160
+}
+
+type HashSpec struct {
+	md *C.EVP_MD
+}
+
+var (
+	MD4       = HashSpec{C.EVP_md4()}
+	MD5       = HashSpec{C.EVP_md5()}
+	SHA1      = HashSpec{C.EVP_sha1()}
+	SHA224    = HashSpec{C.EVP_sha224()}
+	SHA256    = HashSpec{C.EVP_sha256()}
+	SHA384    = HashSpec{C.EVP_sha384()}
+	SHA512    = HashSpec{C.EVP_sha512()}
+	RIPEMD160 = HashSpec{C.EVP_ripemd160()}
+)
+
+func (hs HashSpec) New() okapi.Hash {
+	h := &Hash{md: hs.md}
+	h.ctx = new(C.EVP_MD_CTX)
+	C.EVP_MD_CTX_init(h.ctx)
+	check1(C.EVP_DigestInit_ex(h.ctx, hs.md, nil))
+	return h
 }
 
 type Hash struct {
 	digest []byte
 	ctx    *C.EVP_MD_CTX
 	md     *C.EVP_MD // libcrypto constant
-}
-
-type hashParams struct {
-	md *C.EVP_MD
-}
-
-func (p hashParams) constructor() okapi.HashConstructor {
-	return func() okapi.Hash {
-		return NewHash(p)
-	}
-}
-
-var (
-	MD4       = hashParams{C.EVP_md4()}
-	MD5       = hashParams{C.EVP_md5()}
-	SHA1      = hashParams{C.EVP_sha1()}
-	SHA224    = hashParams{C.EVP_sha224()}
-	SHA256    = hashParams{C.EVP_sha256()}
-	SHA384    = hashParams{C.EVP_sha384()}
-	SHA512    = hashParams{C.EVP_sha512()}
-	RIPEMD160 = hashParams{C.EVP_ripemd160()}
-)
-
-func NewHash(params hashParams) *Hash {
-	algorithm := params.md
-	h := &Hash{md: algorithm}
-	h.ctx = new(C.EVP_MD_CTX)
-	C.EVP_MD_CTX_init(h.ctx)
-	check1(C.EVP_DigestInit_ex(h.ctx, algorithm, nil))
-	return h
 }
 
 func (h *Hash) Size() int {

@@ -9,7 +9,7 @@ import (
 
 func TestHMACHash(t *testing.T) {
 	key := []byte("Open Sesame!")
-	md5 := NewHMAC(MD5, key)
+	md5 := HMAC.New(MD5, key)
 	defer md5.Close()
 	if md5.Size() != 16 {
 		t.Fail()

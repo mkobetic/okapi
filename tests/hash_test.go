@@ -9,7 +9,7 @@ import (
 )
 
 func ExampleMD5() {
-	md5 := MD5()
+	md5 := MD5.New()
 	defer md5.Close()
 	fmt.Printf("Block size %d, digest size %d\n", md5.BlockSize(), md5.Size())
 	md5.Write([]byte("test"))
@@ -21,7 +21,7 @@ func ExampleMD5() {
 }
 
 func ExampleHashCloning() {
-	sha := SHA256()
+	sha := SHA256.New()
 	defer sha.Close()
 	fmt.Printf("Block size %d, digest size %d\n", sha.BlockSize(), sha.Size())
 	sha.Write([]byte("test"))

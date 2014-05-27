@@ -22,28 +22,34 @@ func init() {
 	okapi.SHA512 = SHA512
 }
 
+var (
+	MD4    = C.BCRYPT_MD4_ALGORITHM
+	MD5    = C.BCRYPT_MD5_ALGORITHM
+	SHA1   = C.BCRYPT_SHA1_ALGORITHM
+	SHA224 = C.BCRYPT_SHA224_ALGORITHM
+	SHA256 = C.BCRYPT_SHA256_ALGORITHM
+	SHA384 = C.BCRYPT_SHA384_ALGORITHM
+	SHA512 = C.BCRYPT_SHA512_ALGORITHM
+)
+
+type HashSpec struct {
+	algorithm C.LPCWSTR
+}
+
+func (hs HashSpec) New() okapi.Hash {
+	h := &Hash{algorithm: hs.algorithm}
+	check(C.BCryptOpenAlgorithmProvider(&h.provider, algorithm, nil, 0))
+	h.object = make([]byte, h.getDWORDProperty(C.BCRYPT_OBJECT_LENGTH))
+	check(C.BCryptCreateHash(h.provider, &h.hash, &h.object[0], property, nil, 0, 0))
+	return h
+}
+
 type Hash struct {
 	digest    []byte
 	provider  C.BCRYPT_ALG_HANDLE
 	hash      C.BCRYPT_HASH_HANDLE
 	algorithm C.LPCWSTR
 	object    []byte
-}
-
-func MD4() okapi.Hash    { return NewHash(C.BCRYPT_MD4_ALGORITHM) }
-func MD5() okapi.Hash    { return NewHash(C.BCRYPT_MD5_ALGORITHM) }
-func SHA1() okapi.Hash   { return NewHash(C.BCRYPT_SHA1_ALGORITHM) }
-func SHA224() okapi.Hash { return NewHash(C.BCRYPT_SHA224_ALGORITHM) }
-func SHA256() okapi.Hash { return NewHash(C.BCRYPT_SHA256_ALGORITHM) }
-func SHA384() okapi.Hash { return NewHash(C.BCRYPT_SHA384_ALGORITHM) }
-func SHA512() okapi.Hash { return NewHash(C.BCRYPT_SHA512_ALGORITHM) }
-
-func NewHash(algorithm C.LPCWSTR) okapi.Hash {
-	h := &Hash{algorithm: algorithm}
-	check(C.BCryptOpenAlgorithmProvider(&h.provider, algorithm, nil, 0))
-	h.object = make([]byte, h.getDWORDProperty(C.BCRYPT_OBJECT_LENGTH))
-	check(C.BCryptCreateHash(h.provider, &h.hash, &h.object[0], property, nil, 0, 0))
-	return h
 }
 
 func (h *Hash) Size() int {

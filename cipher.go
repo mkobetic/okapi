@@ -1,5 +1,9 @@
 package okapi
 
+import (
+	"io"
+)
+
 /*
 Cipher is a symmetric/secret key encryption algorithm, meaning the same key is used to both encrypt and decrypt the data and therefore must be kept secret.
 The Cipher API is deliberately simple and consequently somewhat less convenient, CipherWriter and CipherReader should be used instead whenever possible.
@@ -21,13 +25,32 @@ type Cipher interface {
 	BufferedSize() int
 }
 
-// CipherConstructors are used to create instances of Ciphers from a secret key, optional initialization vector (iv) and a boolean indicating whether the cipher instance will be used for encryption or decryption.
-type CipherConstructor func(key, iv []byte, encrypt bool) Cipher
+// CipherSpecs are used to create instances of Ciphers from a secret key and
+// an optional initialization vector (iv).
+type CipherSpec interface {
+	// New creates a Cipher from the CipherSpec, key and iv. The encrypt boolean
+	// indicates whether the Cipherwill be used for encryption or decryption.
+	New(key, iv []byte, encrypt bool) Cipher
+	// NewReader creates CipherReader wrapped around provided Reader.
+	// The associated Cipher is created from the CipherSpec, key and iv.
+	// The optional buffer is used internally. If buffer is not provided,
+	// it will be created with DefaultBufferSize.
+	NewReader(in io.Reader, key, iv, buffer []byte) *CipherReader
+	// NewWriter creates CipherWriter wrapped around provided Writer.
+	// The associated cipher is created from the CipherSpec, key and iv.
+	// The optional buffer is used internally. If buffer is not provided,
+	// it will be created with DefaultBufferSize.
+	NewWriter(out io.Writer, key, iv, buffer []byte) *CipherWriter
+}
 
-// Predefined CipherConstructors for known encryption algorithms and modes, implementations are provided by subpackages. Note that different implementations can support different set of algorithms/modes. If given algorithm/mode combination is not supported by the imported implementations, the value of the corresponding variable will be nil.
+// Predefined CipherSpecs for known encryption algorithms and modes.
+// Implementations are provided by subpackages.`
+// Note that the set of supported algorithms/modes can differ among implementations.
+// If given algorithm/mode combination is not supported by the imported implementations,
+// the value of the corresponding variable will be nil.
 var (
 	AES_ECB, AES_CBC, AES_OFB, AES_CFB, AES_CTR, AES_GCM,
 	BF_ECB, BF_CBC, BF_OFB, BF_CFB,
 	DES3_ECB, DES3_CBC, DES3_OFB, DES3_CFB,
-	RC4 CipherConstructor
+	RC4 CipherSpec
 )

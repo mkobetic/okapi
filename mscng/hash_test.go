@@ -8,7 +8,7 @@ import (
 )
 
 func TestEvpHash(t *testing.T) {
-	md5 := MD5()
+	md5 := MD5.New()
 	defer md5.Close()
 	if md5.Size() != 16 {
 		t.Fail()
@@ -28,7 +28,7 @@ func TestEvpHash(t *testing.T) {
 }
 
 func TestHashCloning(t *testing.T) {
-	sha := SHA256()
+	sha := SHA256.New()
 	defer sha.Close()
 	sha.Write([]byte("test"))
 	sha2 := sha.Clone()
