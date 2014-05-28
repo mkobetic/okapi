@@ -59,7 +59,8 @@ func (h *Hash) BlockSize() int {
 }
 
 func (h *Hash) Reset() {
-	check1(C.EVP_DigestInit_ex(h.ctx, nil, nil))
+	h.digest = nil
+	check1(C.EVP_DigestInit_ex(h.ctx, h.md, nil))
 }
 
 func (h *Hash) Clone() okapi.Hash {

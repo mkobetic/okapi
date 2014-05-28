@@ -45,3 +45,22 @@ func TestHashCloning(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestHashReset(t *testing.T) {
+	sha := SHA1.New()
+	defer sha.Close()
+	sha.Write([]byte("test"))
+	digest := sha.Digest()
+	if hex.EncodeToString(digest) != "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3" {
+		t.Fatalf("%x", digest)
+	}
+	sha.Reset()
+	count, err := sha.Write([]byte("test"))
+	if err != nil || count != 4 {
+		t.Fail()
+	}
+	digest = sha.Digest()
+	if hex.EncodeToString(digest) != "a94a8fe5ccb19ba61c4c0873d391e987982fbbd3" {
+		t.Fatalf("%x", digest)
+	}
+}
