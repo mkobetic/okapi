@@ -32,7 +32,8 @@ type HashSpec struct {
 }
 
 func (hs HashSpec) New() okapi.Hash {
-	return &Hash{Hash: hs.hash.New()}
+	h := hs.hash.New()
+	return &Hash{Hash: h, digest: make([]byte, 0, h.Size())}
 }
 
 type Hash struct {
@@ -46,23 +47,22 @@ func (h *Hash) Clone() okapi.Hash {
 }
 
 func (h *Hash) Write(data []byte) (int, error) {
-	if h.digest != nil {
+	if len(h.digest) > 0 {
 		return 0, errors.New("cannot write into finalized hash")
 	}
 	return h.Hash.Write(data)
 }
 
 func (h *Hash) Digest() []byte {
-	if h.digest != nil {
+	if len(h.digest) > 0 {
 		return h.digest
 	}
-	h.digest = make([]byte, 0, h.Size())
 	h.digest = h.Sum(h.digest)
 	return h.digest
 }
 
 func (h *Hash) Reset() {
-	h.digest = nil
+	h.digest = h.digest[:0]
 	h.Hash.Reset()
 }
 
