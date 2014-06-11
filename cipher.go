@@ -4,24 +4,32 @@ import (
 	"io"
 )
 
-/*
-Cipher is a symmetric/secret key encryption algorithm, meaning the same key is used to both encrypt and decrypt the data and therefore must be kept secret.
-The Cipher API is deliberately simple and consequently somewhat less convenient, CipherWriter and CipherReader should be used instead whenever possible.
-*/
+// Cipher is a symmetric/secret key encryption algorithm, meaning the same key is used
+// to both encrypt and decrypt the data and therefore must be kept secret.
+// The Cipher API is deliberately simple and consequently somewhat less convenient,
+// CipherWriter and CipherReader should be used instead whenever possible.
 type Cipher interface {
-	// Update processes input slice and writes the result into the output slice and returns the number of bytes read and written.
-	// Update will return with no progress (0,0), if there is not at least a block size worth of room in out slice.
+	// Update processes (encrypts or decrypts) input slice and writes the result into the output slice.
+	// It returns the number of bytes read and written. The input and output may be the same slice.
+	// Update will return with no progress (0,0), if there is not at least
+	// a block size worth of room in out slice.
 	Update(in, out []byte) (ins, outs int)
-	// Finish completes the last block of data and writes out whatever is left in the internal buffers and returns the number of bytes written. If the configured cipher mode requires multiples of block size of input (e.g. ECB, CBC), Finish will panic if that condition wasn't met.
+	// Finish completes the last block of data and writes out whatever is left
+	// in the internal buffers and returns the number of bytes written.
+	// If the configured cipher mode requires multiples of block size of input (e.g. ECB, CBC),
+	// Finish will panic if that condition wasn't met.
 	// Update calls are not allowed after Finish is called.
 	Finish(out []byte) int
-	// BlockSize returns the block size of the underlying encryption algorithm in bytes. For stream ciphers the block size is 1.
+	// BlockSize returns the block size of the underlying encryption algorithm in bytes.
+	// For stream ciphers the block size is 1.
 	BlockSize() int
-	// KeySize returns the size of the encryption key in bytes. For some algorithms it is constant for others it can be variable.
+	// KeySize returns the size of the encryption key in bytes. For some algorithms
+	// it is constant for others it can be variable.
 	KeySize() int
-	// Close MUST be called before discarding a cipher instance to securely discard and release any associated resources.
+	// Close MUST be called to securely discard and release any associated secrets and resources.
 	Close()
-	// Cipher must keep track of how much buffered/unprocessed input it's buffering, this should always be less than block size
+	// Cipher must keep track of how much buffered/unprocessed input it's buffering,
+	// this should always be less than block size
 	BufferedSize() int
 }
 
@@ -29,7 +37,7 @@ type Cipher interface {
 // an optional initialization vector (iv).
 type CipherSpec interface {
 	// New creates a Cipher from the CipherSpec, key and iv. The encrypt boolean
-	// indicates whether the Cipherwill be used for encryption or decryption.
+	// indicates whether the Cipher will be used for encryption or decryption.
 	New(key, iv []byte, encrypt bool) Cipher
 	// NewReader creates CipherReader wrapped around provided Reader.
 	// The associated Cipher is created from the CipherSpec, key and iv.
