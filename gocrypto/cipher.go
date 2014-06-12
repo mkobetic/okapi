@@ -106,12 +106,17 @@ func (c *BlockCipher) Update(in, out []byte) (int, int) {
 	inl -= len(c.buffer)
 	copy(out, c.buffer)
 	copy(out[len(c.buffer):], in[:inl])
+	out = out[:outl]
+	c.cipher.CryptBlocks(out, out)
+	// save the leftover from in
 	in = in[inl:]
 	c.buffer = c.buffer[:0]
+	if !(len(in) < c.BlockSize()) {
+		panic("input exceeded output size by more than a block")
+	}
 	if len(in) > 0 {
 		c.buffer = append(c.buffer, in...)
 	}
-	c.cipher.CryptBlocks(out, out)
 	return inl + len(c.buffer), outl
 }
 
