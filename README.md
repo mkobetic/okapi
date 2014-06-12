@@ -16,21 +16,24 @@ import (
 
 See tests subdirectory for usage examples, the test files are mostly go testing style examples.
 
-Status
-======
+DONE
+====
 
-* libcrypto implementation is under active development hashes, symmetric ciphers, RSA, DSA and DH should be fully functional.
-* mscng implementation has only a sketch of hash implementation currently, may not even compile yet
+* libcrypto: hashes, symmetric ciphers, RSA, DSA and DH
+* gocrypto: hashes and symmetric ciphers
+* mscng: only a sketch of hash implementation, may not even compile yet (having difficulties with cgo dev on Windows)
 
 TODO
 ====
 
- * libcrypto: ECDH, ECDSA
- * libcrypto: add PKCS8 import/export for PrivateKey
- * libcrypto: add X.509 import/export for PublicKey
- * libcrypto: portable signature import/export
- * figure out proper GCM interface
- * mscng: catch up
- * gocrypto implementation
- * benchmarks
- * more test coverage
+* libcrypto: ECDH, ECDSA
+* libcrypto: add PKCS8 import/export for PrivateKey
+* libcrypto: add X.509 import/export for PublicKey
+* libcrypto: portable signature import/export
+* figure out proper GCM interface
+* gocrypto: AEAD
+* gocrypto: RSA, DSA, DH
+* gocrypto: ECDSA, ECDH
+* benchmarks
+* mscng: catch up
+* more test coverage
