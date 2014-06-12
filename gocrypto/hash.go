@@ -43,7 +43,6 @@ type Hash struct {
 
 func (h *Hash) Clone() okapi.Hash {
 	panic("gocrypto does not support Hash cloning")
-	return nil
 }
 
 func (h *Hash) Write(data []byte) (int, error) {

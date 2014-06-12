@@ -117,7 +117,7 @@ func TestAES_CTR(t *testing.T) {
 	decrypted := make([]byte, len(plain)-(8*16))
 	ins, outs = aes.Update(encrypted[8*16:], decrypted)
 	if outs != len(plain)-8*16 || ins != outs {
-		t.Fatalf("Wrong decryption byte counts: %d", ins, outs)
+		t.Fatalf("Wrong decryption byte counts: %d, %d", ins, outs)
 	}
 	aes.Finish(nil) // This should not panic
 	if !bytes.Equal(decrypted, plain[16*8:]) {

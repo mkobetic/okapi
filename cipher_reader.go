@@ -67,6 +67,7 @@ func (r *CipherReader) bufferRead(buffer, out []byte) (int, error) {
 	if read == 0 {
 		return 0, err
 	}
+	// TODO: ignoring ins is fishy, what if the cipher does not consume all input?
 	_, outs := r.cipher.Update(buffer[:read], out)
 	return outs, err
 }
