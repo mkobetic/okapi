@@ -2,6 +2,10 @@ package gocrypto
 
 import (
 	"crypto"
+	_ "crypto/md5"
+	_ "crypto/sha1"
+	_ "crypto/sha256"
+	_ "crypto/sha512"
 	"errors"
 	"github.com/mkobetic/okapi"
 	"hash"
